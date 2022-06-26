@@ -26,6 +26,10 @@ import utils
 from IO import read, folders, create_folders
 from load_dataset import prepare_dataset
 
+#Create backup folder
+os.mkdir('explanations')
+os.mkdir('experiments')
+os.mkdir('experiment_files')
 
 def convert_to_csv(filename=str):
     if '.csv' in filename:
