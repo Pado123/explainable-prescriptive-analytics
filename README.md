@@ -28,10 +28,9 @@ Optional parameters: \
 ## Code Example (run it from shell, if you have a Windows machine, remove the "\" and run the complete command )
 
 ## Recommendations and explanations for VINST case study on total time
-python main_recsys.py --filename_completed data/completed.csv --case_id_name REQUEST_ID --activity_name ACTIVITY --start_date_name START_DATE \
---resource_name CE_UO --role_name ROLE --end_date_name END_DATE --pred_column independent_activity --predict_activities "Back-Office Adjustment Requested" \
---experiment_name prova_activity_BAC_BOC --explain True
- 
+python main_recsys.py --filename_completed 'data/VINST cases incidents.csv' --case_id_name ACTIVITY --activity_name ACTIVITY --start_date_name Change_Date+Time \
+--pred_column lead_time --resource_name Involved_ST --role_name Involved_Org_line_3 --experiment_name exp_time_VINST --explain True
+
 ### Recommendations and explanations for BAC case study on Activity "Pending Liquidation Request"
 python main_recsys.py --filename_completed data/completed.csv --case_id_name REQUEST_ID --activity_name ACTIVITY --start_date_name START_DATE \
 --resource_name CE_UO --role_name ROLE --end_date_name END_DATE --pred_column independent_activity --predict_activities "Pending Liquidation Request" \
