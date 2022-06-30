@@ -28,7 +28,7 @@ Optional parameters: \
 ## Code Example (run it from shell, if you have a Windows machine, remove the "\" and run the complete command )
 
 ## Recommendations and explanations for VINST case study on total time
-python main_recsys.py --filename_completed 'data/VINST cases incidents.csv' --case_id_name ACTIVITY --activity_name ACTIVITY --start_date_name Change_Date+Time \
+python main_recsys.py --filename_completed 'data/VINST cases incidents.csv' --case_id_name SR_Number --activity_name ACTIVITY --start_date_name Change_Date+Time \
 --pred_column lead_time --resource_name Involved_ST --role_name Involved_Org_line_3 --experiment_name exp_time_VINST --explain True
 
 ### Recommendations and explanations for BAC case study on Activity "Pending Liquidation Request"

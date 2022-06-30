@@ -26,10 +26,12 @@ import utils
 from IO import read, folders, create_folders
 from load_dataset import prepare_dataset
 
-#Create backup folder
-os.mkdir('explanations')
-os.mkdir('experiments')
-os.mkdir('experiment_files')
+#Create backup folde
+if not os.path.exists('explanations'):
+    os.mkdir('explanations')
+if not os.path.exists('experiments'):
+	os.mkdir('experiments')
+
 
 def convert_to_csv(filename=str):
     if '.csv' in filename:
