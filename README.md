@@ -1,9 +1,7 @@
 # Prescriptive-Analytics
 
-## Installation
-### Create conda environment
-conda env create -f env.yml -p ./env \
-conda activate ./env 
+###Install requirements 
+pip install -r req.txt
 
 ### Parameters
 Mandatory parameters: \
