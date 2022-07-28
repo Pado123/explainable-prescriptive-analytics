@@ -5,10 +5,6 @@
 conda env create -f env.yml -p ./env \
 conda activate ./env 
 
-### Run the code
-Write your command line script inside run.sh, then run it: \
-./run.sh
-
 ### Parameters
 Mandatory parameters: \
 --filename_completed --> log file containing all completed cases \
