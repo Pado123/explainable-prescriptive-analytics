@@ -17,6 +17,7 @@ from os.path import join
 
 import numpy as np
 import pandas as pd
+
 # Converter
 import pm4py
 
@@ -26,11 +27,11 @@ import utils
 from IO import read, folders, create_folders
 from load_dataset import prepare_dataset
 
-#Create backup folde
+# Create backup folde
 if not os.path.exists('explanations'):
     os.mkdir('explanations')
 if not os.path.exists('experiments'):
-	os.mkdir('experiments')
+    os.mkdir('experiments')
 
 
 def convert_to_csv(filename=str):
@@ -137,7 +138,6 @@ explain = args.explain
 explain = bool(explain)
 outlier_thrs = args.outlier_thrs
 
-
 convert_to_csv(filename)
 filename = modify_filename(filename)
 df = read_data(filename, args.start_date_name, args.date_format)
@@ -170,8 +170,10 @@ elif pred_column != "independent_activity" and pred_column != "churn_activity":
         raise NotImplementedError
 
 np.random.seed(1618)  # 6415
-prepare_dataset(df = df, case_id_name = case_id_name, activity_column_name = activity_name, start_date_name = start_date_name, date_format = date_format,
-                end_date_name = end_date_name, pred_column = pred_column, mode="train", experiment_name = experiment_name, override=override,
+prepare_dataset(df=df, case_id_name=case_id_name, activity_column_name=activity_name, start_date_name=start_date_name,
+                date_format=date_format,
+                end_date_name=end_date_name, pred_column=pred_column, mode="train", experiment_name=experiment_name,
+                override=override,
                 pred_attributes=pred_attributes, costs=costs,
                 working_times=working_time, resource_column_name=resource_column_name,
                 role_column_name=role_column_name,
@@ -186,18 +188,17 @@ toDirectory = join(os.getcwd(), 'experiments', experiment_name)
 
 if os.path.exists(toDirectory):
     answer = None
-    while answer not in set(['y','n']):
+    while answer not in {'y', 'n'}:
         print('An experiment with this name already exists, do you want to replace the folder storing the data ? [y/n]')
         answer = input()
-    if answer=='y':
+    if answer == 'y':
         shutil.rmtree(toDirectory)
         shutil.copytree(fromDirectory, toDirectory)
     else:
         print('Backup folder not created')
-else :
+else:
     shutil.copytree(fromDirectory, toDirectory)
     print('Data and results saved')
-
 
 print('Starting import model and data..')
 if not os.path.exists(f'expls_{experiment_name}'):
@@ -208,15 +209,16 @@ model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred
 print('Importing completed...')
 
 print('Analyze variables..')
-quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_type_analysis(X_train, case_id_name, activity_name)
+quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_type_analysis(X_train, case_id_name,
+                                                                                           activity_name)
 warnings.filterwarnings("ignore")
 print('Variable analysis done')
 print('Variable analysis done')
 
 print('Creating hash-map of possible next activities')
-traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name, thrs=outlier_thrs)
+traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
+                                     thrs=outlier_thrs)
 print('Hash-map created')
-
 
 # %% Generate and test recommendations
 print('Starting generating, evaluating and explaining recommendations')

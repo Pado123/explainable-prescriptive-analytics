@@ -11,19 +11,15 @@ import pickle
 import pandas as pd
 import numpy as np
 import time
-from IO import read, write, folders
 
 curr_dir = os.getcwd()
 np.random.seed(1618)
 
-import argparse
-import json
-
 import os
-import numpy as np
 
 from hash_maps import str_list, list_str
 import explain_recsys
+
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -43,18 +39,28 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
             raise NotADirectoryError('Activity missed in hash-table')
 
         kpis = dict()
+        # Create a vector for inference
+        last = trace.loc[max(trace.index)].copy()
+        last_act = last[activity_name]
+
+        # put in all the columns which are not inferrable a null value
+        for var in last.index:
+            if var in (set(quantitative_vars).union(qualitative_vars)):
+                last[var] = "none"
+
+        # Create a vector with the actual prediction
+        if pred_column == 'remaining_time':
+            last['# ACTIVITY=' + last_act] += 1
+            actual_prediction = model.predict(list(last)[1:])
+        elif pred_column == 'independent_activity':
+            actual_prediction = model.predict_proba(list(last)[1:])[0]  # activity case
+
+        # Update history
+        last['# ACTIVITY=' + last_act] += 1
+
         for next_act in next_acts:
-
-            # Create a vector for inference
-            last = trace.loc[max(trace.index)].copy()
-
             # Fill with the supposed activity
             last[activity_name] = next_act
-
-            # put in all the columns which are not inferrable a null value
-            for var in last.index:
-                if var in (set(quantitative_vars).union(qualitative_vars)):
-                    last[var] = "none"
 
             if pred_column == 'remaining_time' :
                 kpis[next_act] = model.predict(list(last)[1:])
@@ -66,7 +72,7 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
             df_final.loc[idx] = pd.Series({'Trace': str_list(trace_acts), 'Next_act': list(kpis.keys())[idx],
                                            'kpi_rel': list(kpis.values())[idx]})
 
-        return df_final
+        return df_final, actual_prediction
 
 
 # %% Main algoritm
@@ -75,16 +81,21 @@ import utils
 
 def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_column, activity_name, traces_hash, model,
                              quantitative_vars, qualitative_vars, X_test, experiment_name, predict_activities=None,
-                             maximize=bool, save=True, explain=True):
+                             maximize=bool, save=True, explain=False):
 
     idx_list = df_rec[case_id_name].unique()
     start_time = time.time()
     results = list()
-    expl_df = pd.DataFrame(columns=[i for i in df_rec.columns if i!='y'])
+    rec_dict = dict()
+    real_dict = dict()
     if not os.path.exists('explanations'):
         os.mkdir('explanations')
     if not os.path.exists(f'explanations/{experiment_name}'):
         os.mkdir(f'explanations/{experiment_name}')
+    if not os.path.exists(f'recommendations/{experiment_name}'):
+        os.mkdir(f'recommendations/{experiment_name}')
+    pickle.dump(quantitative_vars, open(f'explanations/{experiment_name}/quantitative_vars.pkl','wb'))
+    pickle.dump(qualitative_vars, open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'wb'))
 
     for trace_idx in idx_list:
         trace = df_rec[df_rec[case_id_name] == trace_idx].reset_index(drop=True)
@@ -102,7 +113,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
 
 
         try:
-            next_activities = next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity_name,
+            next_activities, actual_prediciton = next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity_name,
                                             quantitative_vars, qualitative_vars, encoding='aggr-hist')
         except:
             print('Next activity not found in transition system')
@@ -141,25 +152,44 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
                 f'Len trace = {len(trace)}, #following_traces = {len(next_activities)}, KPIno_rec {score_reality}, KPIrec {res_rec}, diff{diff_reality}')
         except:
             print('Not in dataset')
+        rec_dict[trace_idx] = {i:j for i,j in zip(next_activities['Next_act'], next_activities['kpi_rel'])}
+        real_dict[trace_idx] = {acts[-1] : actual_prediciton}
+        pickle.dump(rec_dict, open(f'recommendations/{experiment_name}/rec_dict.pkl','wb'))
+        pickle.dump(real_dict, open(f'recommendations/{experiment_name}/real_dict.pkl', 'wb'))
 
         print(f'The suggested activity is {rec_act}')
         if explain:
+            trace_exp = trace.copy()
             for var in (set(quantitative_vars).union(qualitative_vars)):
-                trace[var] = "none"
-            groundtruth_explanation = explain_recsys.evaluate_shap_vals(trace, model, X_test, case_id_name)
-            trace.loc[len(trace) - 1, activity_name] = rec_act
+                trace_exp[var] = "none"
+            groundtruth_explanation = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
+            groundtruth_explanation = [a for a in groundtruth_explanation]
+            groundtruth_explanation = [trace_idx] + groundtruth_explanation
+            groundtruth_explanation = pd.Series(groundtruth_explanation, index=[i for i in df_rec.columns if i!='y'])
+            #Save also groundtruth explanations
+            groundtruth_explanation.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv')
+            groundtruth_explanation.drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))],
+                                         inplace=True)
 
-            delta_explanations = groundtruth_explanation - explain_recsys.evaluate_shap_vals(trace, model, X_test, case_id_name)
-            delta_explanations = [a for a in delta_explanations]
-            delta_explanations = [trace_idx] + delta_explanations
-            delta_explanations = pd.Series(delta_explanations, index=expl_df.columns)
-            try:
-                expl_df = expl_df.append(delta_explanations, ignore_index=True)
-            except:
-                None
+            #stampa l'ultima riga di trace normale
+            trace.iloc[-1].to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_values.csv')
+            last = trace.iloc[-1].copy().drop([case_id_name]+[i for i in (set(quantitative_vars).union(qualitative_vars))])
+            for act in next_activities['Next_act'].values:
+                trace_exp.loc[len(trace_exp) - 1, activity_name] = act
 
-            expl_df.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df.csv')
+                explanations = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
+                explanations = [a for a in explanations]
+                explanations = [trace_idx] + explanations
+                explanations = pd.Series(explanations, index=[i for i in df_rec.columns if i!='y'])
+                explanations.to_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv')
 
+                #Take the best-4 deltas
+                explanations.drop([case_id_name]+[i for i in (set(quantitative_vars).union(qualitative_vars))], inplace=True)
+                deltas_expls = groundtruth_explanation - explanations
+                deltas_expls.sort_values(ascending=False, inplace=True)
+                idxs_chosen = deltas_expls.index[:4]
+
+                explain_recsys.plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act)
         try:
             results.append([len(trace), len(next_activities), score_reality, res_rec, acts, rec_act])
         except:

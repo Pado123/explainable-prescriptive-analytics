@@ -9,30 +9,12 @@ Created on Mon Mar 14 17:29:54 2022
 import catboost
 from catboost import *
 import shap
-import matplotlib.pyplot as plt
 shap.initjs()
 
-import argparse
-import json
-import logging
-
-from load_dataset import prepare_dataset
 import pandas as pd
-import os
-import shutil
-import numpy as np
-from write_results import compare_best_validation_curves, histogram_median_events_per_dataset
 
-#REFACTOR
-from os.path import join
-from IO import read, write, folders, create_folders
-
-#Converter
-import pm4py
-import os
-
-import pandas as pd
-import utils
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 
 def evaluate_shap_vals(trace, model, X_test, case_id_name):
     trace = trace.iloc[-1]
@@ -44,5 +26,32 @@ def evaluate_shap_vals(trace, model, X_test, case_id_name):
     return shap_values[-1]
    
 
+def plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act):
 
+    # Python dictionary
+    expl_df = {"Following Recommendation": [i for i in explanations[idxs_chosen].sort_values(ascending=False).values],
+                          "Actual Value": [i for i in groundtruth_explanation[idxs_chosen].sort_values(ascending=False).values]};
 
+    last = last[idxs_chosen]
+    feature_names = [str(i) for i in last.index]
+    feature_values = [str(i) for i in last.values]
+
+    index = [feature_names[i]+'='+feature_values[i] for i in range(len(feature_values))]
+    # Python dictionary into a pandas DataFrame
+
+    dataFrame = pd.DataFrame(data=expl_df)
+
+    dataFrame.index = index
+
+    dataFrame.plot.barh(rot=0,
+                        title=f"How variables contribution on \n KPI changes, performing or not\n \"{act}\" ",
+                        color=['darkgreen', 'darkred'])
+    plt.tick_params(
+        axis='x',  # changes apply to the x-axis
+        which='both',  # both major and minor ticks are affected
+        bottom=False,  # ticks along the bottom edge are off
+        top=False,  # ticks along the top edge are off
+        labelbottom=False)
+    plt.tight_layout(pad=0)
+    plt.savefig(f'explanations/{experiment_name}/{trace_idx}_{act}.png')
+    plt.close()
