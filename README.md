@@ -1,13 +1,7 @@
 # Prescriptive-Analytics
 
-## Installation
-### Create conda environment
-conda env create -f env.yml -p ./env \
-conda activate ./env 
-
-### Run the code
-Write your command line script inside run.sh, then run it: \
-./run.sh
+### Install requirements 
+pip install -r req.txt
 
 ### Parameters
 Mandatory parameters: \
