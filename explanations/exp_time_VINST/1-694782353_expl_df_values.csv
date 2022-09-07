@@ -1,0 +1,28 @@
+,5
+SR_Number,1-694782353
+Status,Accepted
+ACTIVITY,In Progress
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line A2
+Involved_ST,D4
+SR_Latest_Impact,Medium
+Product,PROD312
+Country,be
+Owner_Country,INDIA
+time_from_start,6.027
+time_from_previous_event(start),0.178
+daytime,38804.57
+weekday,Friday
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,1
+# ACTIVITY=Wait - Implementation,0
+# ACTIVITY=Wait,0
+# ACTIVITY=Wait - Vendor,0
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0

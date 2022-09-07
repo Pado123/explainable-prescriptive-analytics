@@ -1,0 +1,27 @@
+,0
+REQUEST_ID,20176000338.0
+CLOSURE_TYPE,-0.31928656828407065
+CLOSURE_REASON,0.05544703462854
+ACTIVITY,0.06990636481301692
+CE_UO,0.06873661490160317
+ROLE,-1.1836547562317516
+time_from_start,-0.13954142721397786
+time_from_previous_event(start),-0.08825701304476888
+daytime,-0.261004970091124
+weekday,-1.1057239842184028
+activity_duration,0.026406652699960797
+# ACTIVITY=Service closure Request with network responsibility,0.00400889105882731
+# ACTIVITY=Service closure Request with BO responsibility,-0.003210892465900394
+# ACTIVITY=Pending Request for Reservation Closure,0.022371905045044327
+# ACTIVITY=Pending Liquidation Request,0.08180908189049936
+# ACTIVITY=Request completed with account closure,0.0
+# ACTIVITY=Request created,0.04678378914573575
+# ACTIVITY=Authorization Requested,-0.005340393356797558
+# ACTIVITY=Evaluating Request (NO registered letter),-0.007010576114363736
+# ACTIVITY=Network Adjustment Requested,0.00024903783682188053
+# ACTIVITY=Pending Request for acquittance of heirs,0.0
+# ACTIVITY=Request deleted,0.0
+# ACTIVITY=Back-Office Adjustment Requested,-0.0008808729975818058
+# ACTIVITY=Evaluating Request (WITH registered letter),-0.00332097864326648
+# ACTIVITY=Request completed with customer recovery,0.0
+# ACTIVITY=Pending Request for Network Information,0.001509068204928481

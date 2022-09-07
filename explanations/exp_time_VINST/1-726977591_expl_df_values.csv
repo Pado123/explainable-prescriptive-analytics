@@ -1,0 +1,28 @@
+,3
+SR_Number,1-726977591
+Status,Accepted
+ACTIVITY,Wait - Implementation
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line C
+Involved_ST,D5
+SR_Latest_Impact,Medium
+Product,PROD494
+Country,be
+Owner_Country,0
+time_from_start,259.319
+time_from_previous_event(start),256.927
+daytime,42702.935
+weekday,Friday
+# ACTIVITY=In Progress,2
+# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - Implementation,1
+# ACTIVITY=Wait,0
+# ACTIVITY=Wait - Vendor,0
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0

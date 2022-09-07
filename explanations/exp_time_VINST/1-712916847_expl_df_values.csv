@@ -1,0 +1,28 @@
+,8
+SR_Number,1-712916847
+Status,Accepted
+ACTIVITY,In Progress
+Involved_ST_Function_Div,V3_2
+Involved_Org_line_3,Org line C
+Involved_ST,C9
+SR_Latest_Impact,Low
+Product,PROD274
+Country,br
+Owner_Country,Brazil
+time_from_start,1571.963
+time_from_previous_event(start),0.541
+daytime,43149.444
+weekday,Friday
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,2
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - Implementation,1
+# ACTIVITY=Wait,1
+# ACTIVITY=Wait - Vendor,1
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0

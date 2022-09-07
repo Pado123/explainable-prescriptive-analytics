@@ -1,0 +1,28 @@
+,6
+SR_Number,1-557297151
+Status,Accepted
+ACTIVITY,In Progress
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line C
+Involved_ST,D5
+SR_Latest_Impact,Medium
+Product,PROD542
+Country,nl
+Owner_Country,Belgium
+time_from_start,6.529
+time_from_previous_event(start),2.079
+daytime,21355.125
+weekday,Friday
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - Implementation,0
+# ACTIVITY=Wait,0
+# ACTIVITY=Wait - Vendor,0
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0

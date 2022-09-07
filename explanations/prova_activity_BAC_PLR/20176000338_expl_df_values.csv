@@ -1,0 +1,27 @@
+,3
+REQUEST_ID,20176000338
+CLOSURE_TYPE,Inheritance
+CLOSURE_REASON,missing
+ACTIVITY,Service closure Request with BO responsibility
+CE_UO,BOC
+ROLE,BACK-OFFICE
+time_from_start,587488.0
+time_from_previous_event(start),583634.0
+daytime,37682.0
+weekday,Monday
+activity_duration,178992.0
+# ACTIVITY=Service closure Request with network responsibility,1
+# ACTIVITY=Service closure Request with BO responsibility,0
+# ACTIVITY=Pending Request for Reservation Closure,0
+# ACTIVITY=Pending Liquidation Request,0
+# ACTIVITY=Request completed with account closure,0
+# ACTIVITY=Request created,1
+# ACTIVITY=Authorization Requested,1
+# ACTIVITY=Evaluating Request (NO registered letter),0
+# ACTIVITY=Network Adjustment Requested,0
+# ACTIVITY=Pending Request for acquittance of heirs,0
+# ACTIVITY=Request deleted,0
+# ACTIVITY=Back-Office Adjustment Requested,0
+# ACTIVITY=Evaluating Request (WITH registered letter),0
+# ACTIVITY=Request completed with customer recovery,0
+# ACTIVITY=Pending Request for Network Information,0

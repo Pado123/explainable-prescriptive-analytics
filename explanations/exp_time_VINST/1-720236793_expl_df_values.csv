@@ -1,0 +1,28 @@
+,6
+SR_Number,1-720236793
+Status,Accepted
+ACTIVITY,Wait - Vendor
+Involved_ST_Function_Div,V3_2
+Involved_Org_line_3,Org line B
+Involved_ST,S9 2nd
+SR_Latest_Impact,Low
+Product,PROD274
+Country,br
+Owner_Country,Brazil
+time_from_start,113.132
+time_from_previous_event(start),112.407
+daytime,42378.994
+weekday,Friday
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - Implementation,1
+# ACTIVITY=Wait,1
+# ACTIVITY=Wait - Vendor,0
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0

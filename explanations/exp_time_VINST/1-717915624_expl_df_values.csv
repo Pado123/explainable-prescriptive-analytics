@@ -1,0 +1,28 @@
+,5
+SR_Number,1-717915624
+Status,Accepted
+ACTIVITY,In Progress
+Involved_ST_Function_Div,V3_2
+Involved_Org_line_3,Org line C
+Involved_ST,M23
+SR_Latest_Impact,Medium
+Product,PROD455
+Country,se
+Owner_Country,Sweden
+time_from_start,1815.768
+time_from_previous_event(start),12.408
+daytime,43736.335
+weekday,Friday
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=Resolved,0
+# ACTIVITY=Assigned,0
+# ACTIVITY=Closed,0
+# ACTIVITY=Wait - User,1
+# ACTIVITY=Wait - Implementation,0
+# ACTIVITY=Wait,0
+# ACTIVITY=Wait - Vendor,1
+# ACTIVITY=In Call,0
+# ACTIVITY=Wait - Customer,0
+# ACTIVITY=Unmatched,0
+# ACTIVITY=Cancelled,0
