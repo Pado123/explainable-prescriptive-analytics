@@ -120,6 +120,7 @@ class RecSys:
         print('Importing train and test logs')
         self.X_train, self.X_test, self.y_train, self.y_test = utils.import_vars(experiment_name=self.experiment_name,
                                                                                  case_id_name=self.case_id_name)
+        print('Importing completed')
 
     def import_model(self):
         print('Importing model')
@@ -136,7 +137,7 @@ class RecSys:
         print('Variable analysis done')
 
     def create_transtition_system(self):
-        print('Creating transition system')
+        print(f'Creating transition system with a threshold for outliers {outlier_thrs}')
         if 'X_train' not in vars():
             self.generate_train_and_test_logs()
         self.traces_hash = hash_maps.fill_hashmap(X_train=self.X_train, case_id_name=self.case_id_name, activity_name=self.activity_name,
@@ -150,6 +151,13 @@ class RecSys:
         self.df_rec = utils.get_test(self.X_test, self.case_id_name).reset_index(drop=True)
         print('Creation completed')
 
+    def create_log_for_running_cases(self):
+
+        if set('X_test','y_test') not in vars():
+            print('train and test not generated, starting automatic generation')
+            self.generate_train_and_test_logs()
+
+        self.df_score = utils.create_eval_set(self.X_test, self.y_test).values
 
 prova = RecSys(filename_completed=filename, filename_running=filename_running, case_id_name=case_id_name, activity_name=activity_name,
                start_date_name=start_date_name, date_format=date_format,pred_column=pred_column, experiment_name=experiment_name,
