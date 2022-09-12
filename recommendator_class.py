@@ -158,6 +158,13 @@ class RecSys:
             self.generate_train_and_test_logs()
 
         self.df_score = utils.create_eval_set(self.X_test, self.y_test).values
+        self.columns = self.X_test.columns
+
+    def start_generating_recommendations(self):
+
+        next_act.generate_recommendations(self.df_rec, self.df_score, self.columns, self.case_id_name, self.pred_column,
+                                          self.activity_name, self.traces_hash, self.model, self.quantitative_vars, self.qualitative_vars,
+                                          self.X_test, self.experiment_name, explain=self.explain, predict_activities=self.predict_activities)
 
 prova = RecSys(filename_completed=filename, filename_running=filename_running, case_id_name=case_id_name, activity_name=activity_name,
                start_date_name=start_date_name, date_format=date_format,pred_column=pred_column, experiment_name=experiment_name,

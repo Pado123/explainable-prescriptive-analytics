@@ -16,7 +16,9 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 # fig = plt.plot([i for i in range(20)], [i for i in range(20, 60, 2)])
 
 #Create (eventually, clean) the gui backup folder
-shutil.rmtree('gui_backup_data')
+try :
+    shutil.rmtree('gui_backup_data')
+except: None
 os.mkdir('gui_backup_data')
 
 #Set the experiment name (TODO: eventually fix and make it interactive)
