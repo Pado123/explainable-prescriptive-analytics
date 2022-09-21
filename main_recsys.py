@@ -214,7 +214,6 @@ quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_typ
 warnings.filterwarnings("ignore")
 
 print('Variable analysis done')
-print('Variable analysis done')
 
 print('Creating hash-map of possible next activities')
 traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,

@@ -1,19 +1,19 @@
-,5
+,6
 SR_Number,1-623778166
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,missing
-Involved_Org_line_3,Org line V11
-Involved_ST,V54 2nd
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line C
+Involved_ST,D2
 SR_Latest_Impact,Medium
 Product,PROD790
 Country,be
 Owner_Country,France
-time_from_start,12706.321
-time_from_previous_event(start),12267.465
-daytime,44177.852
+time_from_start,12707.318
+time_from_previous_event(start),0.997
+daytime,44178.849
 weekday,Friday
-# ACTIVITY=In Progress,3
+# ACTIVITY=In Progress,4
 # ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

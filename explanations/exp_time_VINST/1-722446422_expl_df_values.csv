@@ -1,22 +1,22 @@
-,3
+,9
 SR_Number,1-722446422
 Status,Accepted
 ACTIVITY,In Progress
-Involved_ST_Function_Div,A2_2
-Involved_Org_line_3,Org line A2
-Involved_ST,G40
+Involved_ST_Function_Div,V3_2
+Involved_Org_line_3,Org line C
+Involved_ST,G97
 SR_Latest_Impact,Low
 Product,PROD215
 Country,pl
-Owner_Country,Sweden
-time_from_start,3.106
-time_from_previous_event(start),2.681
-daytime,42360.315
+Owner_Country,POLAND
+time_from_start,685.608
+time_from_previous_event(start),97.543
+daytime,43042.817
 weekday,Friday
-# ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=In Progress,5
+# ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

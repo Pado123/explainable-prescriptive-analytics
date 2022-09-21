@@ -1,20 +1,20 @@
-,4
+,0
 SR_Number,1-729406081
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,D_1
-Involved_Org_line_3,Org line A2
-Involved_ST,V16 3rd
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,missing
+Involved_Org_line_3,Other
+Involved_ST,V9
 SR_Latest_Impact,Medium
 Product,PROD617
 Country,kr
-Owner_Country,Korea
-time_from_start,47.181
-time_from_previous_event(start),45.946
-daytime,42824.401
+Owner_Country,Sweden
+time_from_start,0.0
+time_from_previous_event(start),0.0
+daytime,42777.22
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=In Progress,0
+# ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

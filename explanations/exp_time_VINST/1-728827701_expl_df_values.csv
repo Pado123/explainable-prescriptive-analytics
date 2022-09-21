@@ -1,4 +1,4 @@
-,4
+,6
 SR_Number,1-728827701
 Status,Accepted
 ACTIVITY,Wait - User
@@ -9,16 +9,16 @@ SR_Latest_Impact,Low
 Product,PROD454
 Country,pl
 Owner_Country,INDIA
-time_from_start,172.273
-time_from_previous_event(start),0.033
-daytime,42762.885
+time_from_start,199.465
+time_from_previous_event(start),0.085
+daytime,42790.077
 weekday,Friday
-# ACTIVITY=In Progress,3
+# ACTIVITY=In Progress,4
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
-# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - User,1
 # ACTIVITY=Wait - Implementation,0
 # ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0

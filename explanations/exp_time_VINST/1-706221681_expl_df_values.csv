@@ -1,26 +1,26 @@
-,6
+,1
 SR_Number,1-706221681
-Status,Accepted
-ACTIVITY,In Progress
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,A2_3
 Involved_Org_line_3,Org line A2
-Involved_ST,G133 3rd
+Involved_ST,M3 2nd
 SR_Latest_Impact,Medium
 Product,PROD655
 Country,se
-Owner_Country,Sweden
-time_from_start,575.869
-time_from_previous_event(start),407.395
-daytime,41646.632
+Owner_Country,USA
+time_from_start,0.914
+time_from_previous_event(start),0.914
+daytime,41071.677
 weekday,Friday
-# ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=In Progress,0
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0
-# ACTIVITY=Wait,1
+# ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0
 # ACTIVITY=In Call,0
 # ACTIVITY=Wait - Customer,0

@@ -1,4 +1,4 @@
-,5
+,11
 SR_Number,1-719204935
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,12 +9,12 @@ SR_Latest_Impact,Low
 Product,PROD31
 Country,se
 Owner_Country,Sweden
-time_from_start,87.437
-time_from_previous_event(start),87.021
-daytime,42268.037
+time_from_start,591.78
+time_from_previous_event(start),342.175
+daytime,42772.38
 weekday,Friday
-# ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,2
+# ACTIVITY=In Progress,6
+# ACTIVITY=Awaiting Assignment,5
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

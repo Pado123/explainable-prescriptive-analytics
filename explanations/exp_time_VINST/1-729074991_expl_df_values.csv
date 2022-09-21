@@ -1,7 +1,7 @@
-,0
+,2
 SR_Number,1-729074991
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait
 Involved_ST_Function_Div,E_8
 Involved_Org_line_3,Org line C
 Involved_ST,G181 2nd
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD476
 Country,in
 Owner_Country,France
-time_from_start,0.0
-time_from_previous_event(start),0.0
-daytime,42594.389
+time_from_start,0.155
+time_from_previous_event(start),0.033
+daytime,42594.544
 weekday,Friday
-# ACTIVITY=In Progress,0
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

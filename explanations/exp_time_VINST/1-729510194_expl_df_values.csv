@@ -1,20 +1,20 @@
-,2
+,4
 SR_Number,1-729510194
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,Assigned
 Involved_ST_Function_Div,E_10
 Involved_Org_line_3,Org line B
 Involved_ST,G230 2nd
 SR_Latest_Impact,Low
 Product,PROD424
 Country,se
-Owner_Country,POLAND
-time_from_start,1.957
-time_from_previous_event(start),1.937
-daytime,42771.834
+Owner_Country,INDIA
+time_from_start,2.24
+time_from_previous_event(start),0.13
+daytime,42772.117
 weekday,Friday
-# ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

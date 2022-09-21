@@ -1,4 +1,4 @@
-,1
+,3
 SR_Number,1-716410529
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,14 +9,14 @@ SR_Latest_Impact,Low
 Product,PROD494
 Country,ca
 Owner_Country,Canada
-time_from_start,0.116
-time_from_previous_event(start),0.116
-daytime,41753.726
+time_from_start,1809.898
+time_from_previous_event(start),1809.771
+daytime,43563.508
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

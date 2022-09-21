@@ -1,4 +1,4 @@
-,7
+,11
 SR_Number,1-729564393
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,16 +9,16 @@ SR_Latest_Impact,Low
 Product,PROD279
 Country,pl
 Owner_Country,POLAND
-time_from_start,344.552
-time_from_previous_event(start),342.381
-daytime,43117.809
+time_from_start,953.63
+time_from_previous_event(start),598.602
+daytime,43726.887
 weekday,Friday
-# ACTIVITY=In Progress,4
+# ACTIVITY=In Progress,6
 # ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
-# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - User,1
 # ACTIVITY=Wait - Implementation,0
 # ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0

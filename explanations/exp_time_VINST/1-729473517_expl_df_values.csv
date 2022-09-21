@@ -1,4 +1,4 @@
-,0
+,1
 SR_Number,1-729473517
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD747
 Country,se
 Owner_Country,Belgium
-time_from_start,0.0
-time_from_previous_event(start),0.0
-daytime,42772.722
+time_from_start,0.026
+time_from_previous_event(start),0.026
+daytime,42772.748
 weekday,Friday
-# ACTIVITY=In Progress,0
+# ACTIVITY=In Progress,1
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

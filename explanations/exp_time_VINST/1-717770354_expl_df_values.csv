@@ -1,20 +1,20 @@
-,1
+,5
 SR_Number,1-717770354
 Status,Accepted
 ACTIVITY,In Progress
-Involved_ST_Function_Div,V3_2
-Involved_Org_line_3,Org line C
-Involved_ST,G96
+Involved_ST_Function_Div,missing
+Involved_Org_line_3,Org line V9
+Involved_ST,V43 2nd
 SR_Latest_Impact,High
 Product,PROD820
 Country,se
-Owner_Country,INDIA
-time_from_start,0.028
-time_from_previous_event(start),0.028
-daytime,41907.578
+Owner_Country,POLAND
+time_from_start,1724.259
+time_from_previous_event(start),1722.473
+daytime,43631.809
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

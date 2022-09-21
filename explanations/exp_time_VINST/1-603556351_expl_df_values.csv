@@ -1,22 +1,22 @@
-,2
+,4
 SR_Number,1-603556351
-Status,Accepted
-ACTIVITY,Assigned
-Involved_ST_Function_Div,missing
-Involved_Org_line_3,Org line F
-Involved_ST,G207 2nd
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,A2_2
+Involved_Org_line_3,Org line A2
+Involved_ST,G167 2nd
 SR_Latest_Impact,Low
 Product,PROD681
 Country,se
-Owner_Country,France
-time_from_start,0.364
-time_from_previous_event(start),0.346
-daytime,28249.626
+Owner_Country,Sweden
+time_from_start,17.216
+time_from_previous_event(start),0.02
+daytime,28266.478
 weekday,Friday
-# ACTIVITY=In Progress,2
+# ACTIVITY=In Progress,3
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

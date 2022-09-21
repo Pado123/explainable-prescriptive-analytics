@@ -1,20 +1,20 @@
-,4
+,3
 SR_Number,1-720238521
-Status,Accepted
-ACTIVITY,In Progress
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,A2_4
 Involved_Org_line_3,Org line A2
 Involved_ST,G108 2nd
 SR_Latest_Impact,Low
 Product,PROD66
 Country,se
-Owner_Country,USA
-time_from_start,19.323
-time_from_previous_event(start),1.089
-daytime,42297.622
+Owner_Country,Brazil
+time_from_start,18.234
+time_from_previous_event(start),0.051
+daytime,42296.533
 weekday,Friday
 # ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,2
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

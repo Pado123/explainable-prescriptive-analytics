@@ -1,22 +1,22 @@
-,3
+,6
 SR_Number,1-709502283
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,V3_2
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,E_5
 Involved_Org_line_3,Org line C
-Involved_ST,S31
+Involved_ST,G78
 SR_Latest_Impact,Low
 Product,PROD683
 Country,pl
 Owner_Country,Japan
-time_from_start,2.809
-time_from_previous_event(start),2.673
-daytime,41219.013
+time_from_start,5.134
+time_from_previous_event(start),0.211
+daytime,41221.338
 weekday,Friday
-# ACTIVITY=In Progress,2
+# ACTIVITY=In Progress,4
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

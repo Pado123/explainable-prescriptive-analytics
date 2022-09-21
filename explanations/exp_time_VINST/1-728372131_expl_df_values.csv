@@ -1,4 +1,4 @@
-,8
+,7
 SR_Number,1-728372131
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD424
 Country,se
 Owner_Country,POLAND
-time_from_start,513.068
-time_from_previous_event(start),0.021
-daytime,43039.83
+time_from_start,513.047
+time_from_previous_event(start),3.016
+daytime,43039.809
 weekday,Friday
-# ACTIVITY=In Progress,4
+# ACTIVITY=In Progress,3
 # ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,1

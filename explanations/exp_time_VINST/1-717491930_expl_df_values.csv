@@ -1,4 +1,4 @@
-,1
+,3
 SR_Number,1-717491930
 Status,Accepted
 ACTIVITY,In Progress
@@ -8,12 +8,12 @@ Involved_ST,G96
 SR_Latest_Impact,Low
 Product,PROD424
 Country,pl
-Owner_Country,Brazil
-time_from_start,0.047
-time_from_previous_event(start),0.047
-daytime,41875.751
+Owner_Country,INDIA
+time_from_start,1662.358
+time_from_previous_event(start),1660.965
+daytime,43538.062
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
@@ -22,7 +22,7 @@ weekday,Friday
 # ACTIVITY=Wait - Implementation,0
 # ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0
-# ACTIVITY=In Call,0
+# ACTIVITY=In Call,1
 # ACTIVITY=Wait - Customer,0
 # ACTIVITY=Unmatched,0
 # ACTIVITY=Cancelled,0

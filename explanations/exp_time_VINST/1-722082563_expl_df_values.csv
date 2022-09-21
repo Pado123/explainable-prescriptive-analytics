@@ -1,7 +1,7 @@
-,5
+,7
 SR_Number,1-722082563
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,Wait
 Involved_ST_Function_Div,A2_1
 Involved_Org_line_3,Org line B
 Involved_ST,D1
@@ -9,12 +9,12 @@ SR_Latest_Impact,Medium
 Product,PROD305
 Country,cn
 Owner_Country,INDIA
-time_from_start,1324.674
-time_from_previous_event(start),1318.06
-daytime,43661.755
+time_from_start,1404.5
+time_from_previous_event(start),0.06
+daytime,43741.581
 weekday,Friday
-# ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=In Progress,4
+# ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

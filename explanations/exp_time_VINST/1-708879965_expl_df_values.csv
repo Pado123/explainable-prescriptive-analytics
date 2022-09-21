@@ -1,7 +1,7 @@
-,6
+,7
 SR_Number,1-708879965
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait - User
 Involved_ST_Function_Div,A2_1
 Involved_Org_line_3,Org line C
 Involved_ST,D6
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD235
 Country,be
 Owner_Country,Belgium
-time_from_start,86.511
-time_from_previous_event(start),66.034
-daytime,41234.173
+time_from_start,87.379
+time_from_previous_event(start),0.868
+daytime,41235.041
 weekday,Friday
-# ACTIVITY=In Progress,3
+# ACTIVITY=In Progress,4
 # ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

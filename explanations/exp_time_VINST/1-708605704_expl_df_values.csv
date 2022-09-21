@@ -1,7 +1,7 @@
-,8
+,7
 SR_Number,1-708605704
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Assigned
 Involved_ST_Function_Div,E_8
 Involved_Org_line_3,Org line C
 Involved_ST,G186 2nd
@@ -9,14 +9,14 @@ SR_Latest_Impact,Medium
 Product,PROD473
 Country,in
 Owner_Country,INDIA
-time_from_start,2430.433
-time_from_previous_event(start),2425.103
-daytime,43572.404
+time_from_start,5.33
+time_from_previous_event(start),0.12
+daytime,41147.301
 weekday,Friday
 # ACTIVITY=In Progress,4
 # ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,1
+# ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

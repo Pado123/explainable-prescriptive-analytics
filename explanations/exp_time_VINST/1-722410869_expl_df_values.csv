@@ -1,7 +1,7 @@
-,1
+,2
 SR_Number,1-722410869
-Status,Accepted
-ACTIVITY,In Progress
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
 Involved_ST,S42
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD661
 Country,se
 Owner_Country,Sweden
-time_from_start,0.028
-time_from_previous_event(start),0.028
-daytime,42357.469
+time_from_start,0.034
+time_from_previous_event(start),0.006
+daytime,42357.475
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

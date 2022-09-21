@@ -1,7 +1,7 @@
-,1
+,2
 SR_Number,1-657893589
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait - Vendor
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line B
 Involved_ST,V39 2nd
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD114
 Country,br
 Owner_Country,Brazil
-time_from_start,0.085
-time_from_previous_event(start),0.085
-daytime,35787.199
+time_from_start,0.458
+time_from_previous_event(start),0.373
+daytime,35787.572
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

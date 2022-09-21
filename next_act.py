@@ -166,6 +166,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
             groundtruth_explanation = [a for a in groundtruth_explanation]
             groundtruth_explanation = [trace_idx] + groundtruth_explanation
             groundtruth_explanation = pd.Series(groundtruth_explanation, index=[i for i in df_rec.columns if i!='y'])
+
             #Save also groundtruth explanations
             groundtruth_explanation.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv')
             groundtruth_explanation.drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))],
@@ -188,8 +189,11 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
                 deltas_expls = groundtruth_explanation - explanations
                 deltas_expls.sort_values(ascending=False, inplace=True)
                 idxs_chosen = deltas_expls.index[:4]
-
+                import ipdb; ipdb.set_trace()
+                pickle.dump(idxs_chosen, open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'wb'))
+                pickle.dump(last, open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'wb'))
                 explain_recsys.plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act)
+
         try:
             results.append([len(trace), len(next_activities), score_reality, res_rec, acts, rec_act])
         except:

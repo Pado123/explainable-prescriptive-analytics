@@ -1,4 +1,4 @@
-,1
+,0
 SR_Number,1-658515933
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD424
 Country,se
 Owner_Country,INDIA
-time_from_start,0.029
-time_from_previous_event(start),0.029
-daytime,35860.91
+time_from_start,0.0
+time_from_previous_event(start),0.0
+daytime,35860.881
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,0
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

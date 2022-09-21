@@ -1,7 +1,7 @@
-,3
+,4
 SR_Number,1-715416771
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,In Progress
 Involved_ST_Function_Div,D_1
 Involved_Org_line_3,Org line A2
 Involved_ST,G197 2nd
@@ -9,12 +9,12 @@ SR_Latest_Impact,Medium
 Product,PROD617
 Country,kr
 Owner_Country,POLAND
-time_from_start,1.495
-time_from_previous_event(start),0.065
-daytime,41654.593
+time_from_start,1.568
+time_from_previous_event(start),0.073
+daytime,41654.666
 weekday,Friday
 # ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

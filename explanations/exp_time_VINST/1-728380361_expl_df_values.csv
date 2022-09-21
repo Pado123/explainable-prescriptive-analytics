@@ -1,19 +1,19 @@
-,3
+,4
 SR_Number,1-728380361
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,V3_2
-Involved_Org_line_3,Org line G2
-Involved_ST,S8
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line A2
+Involved_ST,S1 2nd
 SR_Latest_Impact,Medium
 Product,PROD140
 Country,br
 Owner_Country,Brazil
-time_from_start,18.462
-time_from_previous_event(start),14.53
-daytime,42548.504
+time_from_start,18.589
+time_from_previous_event(start),0.127
+daytime,42548.631
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
