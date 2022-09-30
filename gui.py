@@ -1,29 +1,40 @@
-from dash import Dash, Input, Output, callback, dash_table, html, dcc
+from dash import Dash, Input, Output, callback, dash_table, html, dcc, State, MATCH, ALL
+from dash.dependencies import Input, Output, State
 import pandas as pd
-import plotly.express as px
-from skimage import io
+import io
 import pickle
 import numpy as np
-import shutil
+import shap
+import base64
 import os
+import datetime
+import pm4py
+shap.initjs()
+
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+from utils import convert_to_csv, modify_filename, read_data
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+layout = go.Layout(
+    yaxis=dict(
+        range=[-1, 12]
+    ),
+    height=600
+)
 
-df = pd.read_csv('https://git.io/Juf1t')
-app = Dash(__name__, external_stylesheets=external_stylesheets)
-# fig = plt.plot([i for i in range(20)], [i for i in range(20, 60, 2)])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-#Create (eventually, clean) the gui backup folder
-try :
-    shutil.rmtree('gui_backup_data')
-except: None
-os.mkdir('gui_backup_data')
-
-#Set the experiment name (TODO: eventually fix and make it interactive)
+# Set the experiment name
 experiment_name = 'exp_time_VINST'
-ids_total = list(pd.read_csv('data/VINST cases incidents.csv')['ACTIVITY'].unique())
+act_total = list(pd.read_csv('data/VINST cases incidents.csv')['ACTIVITY'].unique())
+
+if not os.path.exists(f'gui_backup'):
+    os.mkdir('gui_backup')
 
 # Read the dictionaries with the scores
 rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
@@ -44,21 +55,122 @@ for key in rec_dict.keys():
     best_3_dict[key] = dict(sorted(rec_dict[key].items(), key=lambda item: item[1], reverse=False))
     best_3_dict[key] = {k: best_3_dict[key][k] for k in list(best_3_dict[key])[:3]}
 
+kpis_dict = dict()
+real_dict = dict(sorted(real_dict.items(), key=lambda x: list(x[1].values())[0]))
+# Added (list(real_dict[key].values())[0]*.1) for showing also not so good cases
+for key in real_dict.keys():
+    if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (list(real_dict[key].values())[0]*.05):
+        kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
 
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+            df.to_csv('data/curr_df.csv')
+            pickle.dump(list(df.columns), open('gui_backup/col_list.pkl','wb'))
+
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+
+        elif '.xes' in filename:
+            #Assume that it is a log
+            pm4py.convert_to_dataframe(pm4py.read_xes(io.BytesIO(decoded))).to_csv(path_or_buf=(filename[:-4] + '.csv'), index=None)
+
+
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+    return list(df.columns)
 
 app.layout = html.Div([html.Div(children=[
+    dbc.Row(
+        [
+            dbc.Col(dcc.Upload(
+            id='upload-L_complete',
+            children=html.Div([html.A('Select a log of complete traces for training the framework')]),
+            style={
+                'width': '80%',
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            },
+            # Allow multiple files to be uploaded
+            multiple=True
+        )
+        ),
+    dbc.Col(html.Button("Analize", id="df_analyzer", n_clicks=0))]),
+    html.Div(id='dropdown-container', children=[]),
+    html.Div(id='dropdown-container-output'),
+    html.Div(id='output-L_complete'),
+    dcc.Textarea(
+            id='textarea-state-radioitems',
+            value='Select the KPI you want to optimize',
+            style={'width': '25%', 'height': 35, 'borderStyle':'None'},
+            disabled='True',
+        ),
+    dcc.RadioItems([
+        {'label': 'Total execution time   ', 'value': 'Decrease Time'},
+        # {'label': 'Total cost of the procedure   ', 'value': 'Decrease cost'},  #TODO :Not implemented path
+        {'label': 'Minimize activity occurrence   ', 'value': 'Minimize the activity occurrence'},
+        {'label': 'Maximize activity occurrence   ', 'value': 'Maximize the activity occurrence'}
+    ],
+        labelStyle={'display': 'block'},
+        id='radioitem_kpi',
+    ),
+    dcc.Textarea(
+            id='textarea-state-radioitems-chooseKPI',
+            value='Select the activity for which you want to optimize the occurrence',
+            style={'width': '25%', 'height': 55, 'borderStyle':'None'},
+            disabled='True',
+        ),
+    dcc.Dropdown(act_total, 'No activity has been selected', id='dropdown_KPIactivity',
+                 style={
+                     'width': '40%',
+                 }
+                 ),
+    html.Button('Train!', id='submit-val', n_clicks=0),
+    dcc.Upload(
+                    id='upload-L_train',
+                    children=html.Div([
+                        'Drag and Drop or ',
+                        html.A('Select a log of running instances the framework')
+                    ]),
+                    style={
+                        'width': '40%',
+                        'height': '60px',
+                        'lineHeight': '60px',
+                        'borderWidth': '1px',
+                        'borderStyle': 'dashed',
+                        'borderRadius': '5px',
+                        'textAlign': 'center',
+                        'margin': '10px'
+                    },
+                    # Allow multiple files to be uploaded
+                    multiple=False
+                ),
     dcc.Graph(
         figure={
             'data': [
-                {'x': [list(i.values())[0] for i in list(real_dict.values())], 'y': list(best_scores.keys()),
+                {'x': [int(kpis_dict[i][1])/3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
                  'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                {'x': [list(i.values())[0] for i in list(best_scores.values())], 'y': list(best_scores.keys()),
+                {'x': [int(kpis_dict[i][0])/3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
                  'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
-                 'marker': dict(color='rgba(0, 130, 0, 1)')},
+                 'marker': dict(color='rgba(0, 60, 0, 1)')},
             ],
-            'layout': {
-                'title': 'First dashboard for explainable prescriptive analytics',
-                'scrollZoom': True},
+
+            'layout': layout
         },
     ),
     dcc.Textarea(
@@ -67,7 +179,7 @@ app.layout = html.Div([html.Div(children=[
         style={'width': '100%', 'height': 50},
         disabled='True',
     ),
-    dcc.Dropdown(list(real_dict.keys()), list(real_dict.keys())[0], id='dropdown_traces'),
+    dcc.Dropdown(list(kpis_dict.keys())[::-1], list(kpis_dict.keys())[0], id='dropdown_traces'),
     html.Div(id='table_activities'),
     dcc.Textarea(
         id='textarea-state-activity-choice',
@@ -76,7 +188,7 @@ app.layout = html.Div([html.Div(children=[
         disabled='True',
     ),
     # html.Div(id='dropdown_traces_2'),
-    dcc.Dropdown(ids_total, 'No activity has been selected', id='dropdown_activities'),
+    dcc.Dropdown(act_total, 'No activity has been selected', id='dropdown_activities'),
     html.Div(id='figure_explanation'),
     html.Br()
 ])
@@ -95,21 +207,105 @@ def render_content(value):
         df.loc[i] = np.array([list(dict_id.keys())[i], dict_id[list(dict_id.keys())[i]]])
     return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
 
+@app.callback(
+    Output('unuseful_output', 'children'),
+    Input('radioitem_kpi', 'value'),
+)
+def chosen_kpi(value):
+    pickle.dump(value, 'gui_backup/chosen_kpi.pkl', 'wb')
+
 
 @app.callback(
     Output('figure_explanation', 'children'),
     Input('dropdown_activities', 'value'), Input('dropdown_traces', 'value')
 )
 def create_expl_fig(act, value):
-    try :
-        img = io.imread(f'explanations/{experiment_name}/{value}_{act}.png')
-        fig = px.imshow(img)
-        return dcc.Graph(figure=fig,
-                         style={'width': '220', 'height': '90'})
-    except :
+
+    trace_idx = value
+    act = act
+
+    explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
+    idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
+    groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
+    last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
+
+    expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
+               "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
+
+    last = last[idxs_chosen]
+    feature_names = [str(i) for i in last.index]
+    feature_values = [str(i) for i in last.values]
+
+    index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
+    plot_df = pd.DataFrame(data=expl_df)
+    plot_df.index = index
+
+    try:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=list(expl_df['Following Recommendation']),
+            y=list(index),
+            name='Following recommendation',
+            marker_color='darkgreen',orientation='h'
+        ))
+        fig.add_trace(go.Bar(
+            x=list(expl_df['Actual Value']),
+            y=list(index),
+            name='Actual Value',
+            marker_color='darkred', orientation='h'
+        ))
+        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not \n the recommendation for the activity {act} and the trace {value}')
+        return dcc.Graph(figure=fig)
+    except:
         return 'Please select one of the activities proposed above'
 
+@app.callback(Output('output-L_complete', 'children'),
+              Input('upload-L_complete', 'contents'),
+              State('upload-L_complete', 'filename'),
+              State('upload-L_complete', 'last_modified'))
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+
+@app.callback(
+    Output('dropdown-container', 'children'),
+    Input('df_analyzer', 'n_clicks'),
+    State('dropdown-container', 'children'))
+def display_dropdowns(n_clicks, children):
+    children = list()
+    if n_clicks >= 1:
+        for i in range(4):
+            if i == 0:name = 'Select the Case Id column'
+            elif i == 1: name = 'Select the Activity column'
+            elif i == 2: name = 'Select the Start Date column'
+            elif i == 3: name = 'Select the ResourceName column (optional)'
+
+            new_dropdown = dcc.Dropdown(
+                        pickle.load(open('gui_backup/col_list.pkl','rb')),
+                        placeholder=name,
+                        id={
+                            'type': 'columns-dropdown',
+                            'index': i+1
+                        },
+                        style = {
+                                    'width': '75%'
+                                },
+            )
+            children.append(new_dropdown)
+        return children
+
+@app.callback(
+    Output('dropdown-container-output', 'children'),
+    Input({'type': 'filter-dropdown', 'index': ALL}, 'value')
+)
+def display_output(values):
+    return html.Div([
+        html.Div('Dropdown {} = {}'.format(i + 1, value))
+        for (i, value) in enumerate(values)
+    ])
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True)

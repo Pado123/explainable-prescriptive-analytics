@@ -1,20 +1,20 @@
-,4
+,2
 SR_Number,1-657323705
-Status,Accepted
-ACTIVITY,Wait
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line V11
 Involved_ST,V59 2nd
 SR_Latest_Impact,Medium
 Product,PROD235
 Country,gb
-Owner_Country,United Kingdom
-time_from_start,4923.612
-time_from_previous_event(start),2344.484
-daytime,40630.256
+Owner_Country,POLAND
+time_from_start,0.247
+time_from_previous_event(start),0.233
+daytime,35706.891
 weekday,Friday
-# ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=In Progress,2
+# ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

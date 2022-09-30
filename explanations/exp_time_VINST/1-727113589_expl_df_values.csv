@@ -1,20 +1,20 @@
-,1
+,4
 SR_Number,1-727113589
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait - User
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
-Involved_ST,N38
+Involved_ST,N49
 SR_Latest_Impact,Medium
 Product,PROD261
 Country,us
 Owner_Country,USA
-time_from_start,0.089
-time_from_previous_event(start),0.089
-daytime,42457.152
+time_from_start,5.069
+time_from_previous_event(start),0.009
+daytime,42462.132
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

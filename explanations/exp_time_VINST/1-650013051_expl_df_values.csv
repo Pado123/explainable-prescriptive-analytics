@@ -1,4 +1,4 @@
-,5
+,3
 SR_Number,1-650013051
 Status,Accepted
 ACTIVITY,In Progress
@@ -8,15 +8,15 @@ Involved_ST,V17 3rd
 SR_Latest_Impact,Medium
 Product,PROD617
 Country,kr
-Owner_Country,Korea
-time_from_start,229.885
-time_from_previous_event(start),226.126
-daytime,35141.723
+Owner_Country,POLAND
+time_from_start,3.741
+time_from_previous_event(start),3.538
+daytime,34915.579
 weekday,Friday
-# ACTIVITY=In Progress,3
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,1
+# ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

@@ -1,4 +1,4 @@
-,1
+,0
 SR_Number,1-730065800
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD424
 Country,us
 Owner_Country,USA
-time_from_start,0.055
-time_from_previous_event(start),0.055
-daytime,42815.085
+time_from_start,0.0
+time_from_previous_event(start),0.0
+daytime,42815.03
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,0
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

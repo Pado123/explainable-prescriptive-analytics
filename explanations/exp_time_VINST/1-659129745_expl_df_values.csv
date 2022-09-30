@@ -1,7 +1,7 @@
-,2
+,4
 SR_Number,1-659129745
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,Wait - User
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
 Involved_ST,S55
@@ -9,12 +9,12 @@ SR_Latest_Impact,Low
 Product,PROD424
 Country,cn
 Owner_Country,China
-time_from_start,0.301
-time_from_previous_event(start),0.09
-daytime,36113.618
+time_from_start,85.76
+time_from_previous_event(start),0.023
+daytime,36199.077
 weekday,Friday
-# ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

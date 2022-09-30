@@ -84,7 +84,6 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
                              maximize=bool, save=True, explain=False):
 
     idx_list = df_rec[case_id_name].unique()
-    start_time = time.time()
     results = list()
     rec_dict = dict()
     real_dict = dict()
@@ -132,6 +131,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
                 print(trace_idx, 'check it')
         score_before = list()
         print(other_traces)
+
         # Evaluate the score for each trace
         for act in other_traces[0]:
             score_before.append(
@@ -147,6 +147,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
             diff_reality = score_reality - res_rec
         except:
             None
+
         try:
             print(
                 f'Len trace = {len(trace)}, #following_traces = {len(next_activities)}, KPIno_rec {score_reality}, KPIrec {res_rec}, diff{diff_reality}')
@@ -160,12 +161,14 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
         print(f'The suggested activity is {rec_act}')
         if explain:
             trace_exp = trace.copy()
+            start = time.time()
             for var in (set(quantitative_vars).union(qualitative_vars)):
                 trace_exp[var] = "none"
             groundtruth_explanation = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
             groundtruth_explanation = [a for a in groundtruth_explanation]
             groundtruth_explanation = [trace_idx] + groundtruth_explanation
             groundtruth_explanation = pd.Series(groundtruth_explanation, index=[i for i in df_rec.columns if i!='y'])
+
             #Save also groundtruth explanations
             groundtruth_explanation.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv')
             groundtruth_explanation.drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))],
@@ -174,6 +177,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
             #stampa l'ultima riga di trace normale
             trace.iloc[-1].to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_values.csv')
             last = trace.iloc[-1].copy().drop([case_id_name]+[i for i in (set(quantitative_vars).union(qualitative_vars))])
+            next_activities = next_activities.iloc[:3] #TODO: Note that is only optimized for minimizing a KPI
             for act in next_activities['Next_act'].values:
                 trace_exp.loc[len(trace_exp) - 1, activity_name] = act
 
@@ -189,7 +193,12 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
                 deltas_expls.sort_values(ascending=False, inplace=True)
                 idxs_chosen = deltas_expls.index[:4]
 
+                pickle.dump(idxs_chosen, open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'wb'))
+                pickle.dump(last, open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'wb'))
                 explain_recsys.plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act)
+
+        print(f'The total execution split for 4 explanations generated is {int(time.time()-start)}')
+
         try:
             results.append([len(trace), len(next_activities), score_reality, res_rec, acts, rec_act])
         except:

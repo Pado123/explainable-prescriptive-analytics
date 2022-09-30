@@ -1,7 +1,7 @@
-,6
+,1
 SR_Number,1-702586831
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,In Progress
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line V10
 Involved_ST,P1
@@ -9,18 +9,18 @@ SR_Latest_Impact,Low
 Product,PROD612
 Country,fr
 Owner_Country,France
-time_from_start,1363.777
-time_from_previous_event(start),428.472
-daytime,41737.127
+time_from_start,0.422
+time_from_previous_event(start),0.422
+daytime,40373.772
 weekday,Friday
-# ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=In Progress,1
+# ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
-# ACTIVITY=Wait - User,1
+# ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0
-# ACTIVITY=Wait,1
+# ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0
 # ACTIVITY=In Call,0
 # ACTIVITY=Wait - Customer,0

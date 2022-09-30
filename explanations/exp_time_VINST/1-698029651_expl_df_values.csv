@@ -1,7 +1,7 @@
-,1
+,2
 SR_Number,1-698029651
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait - User
 Involved_ST_Function_Div,A2_5
 Involved_Org_line_3,Org line A2
 Involved_ST,N30 2nd
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD486
 Country,us
 Owner_Country,Sweden
-time_from_start,1.298
-time_from_previous_event(start),1.298
-daytime,39419.653
+time_from_start,84.432
+time_from_previous_event(start),83.134
+daytime,39502.787
 weekday,Friday
-# ACTIVITY=In Progress,0
+# ACTIVITY=In Progress,1
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

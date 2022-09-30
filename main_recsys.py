@@ -214,7 +214,6 @@ quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_typ
 warnings.filterwarnings("ignore")
 
 print('Variable analysis done')
-print('Variable analysis done')
 
 print('Creating hash-map of possible next activities')
 traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
@@ -228,3 +227,4 @@ columns = X_test.columns
 next_act.generate_recommendations(df_rec, df_score, columns, case_id_name, pred_column, activity_name,
                                   traces_hash, model, quantitative_vars, qualitative_vars, X_test,
                                   experiment_name, explain=explain, predict_activities=predict_activities)
+

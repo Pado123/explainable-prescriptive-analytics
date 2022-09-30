@@ -1,22 +1,22 @@
-,8
+,3
 SR_Number,1-729406661
 Status,Accepted
-ACTIVITY,Wait - User
+ACTIVITY,In Progress
 Involved_ST_Function_Div,D_1
 Involved_Org_line_3,Org line A2
-Involved_ST,V16 3rd
+Involved_ST,G197 2nd
 SR_Latest_Impact,High
 Product,PROD617
 Country,kr
-Owner_Country,Sweden
-time_from_start,41.784
-time_from_previous_event(start),0.031
-daytime,42931.861
+Owner_Country,USA
+time_from_start,1.371
+time_from_previous_event(start),1.07
+daytime,42891.448
 weekday,Friday
-# ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,4
+# ACTIVITY=In Progress,0
+# ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,1
+# ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

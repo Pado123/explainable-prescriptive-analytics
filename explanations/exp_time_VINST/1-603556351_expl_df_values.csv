@@ -1,7 +1,7 @@
-,2
+,1
 SR_Number,1-603556351
 Status,Accepted
-ACTIVITY,Assigned
+ACTIVITY,In Progress
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line F
 Involved_ST,G207 2nd
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD681
 Country,se
 Owner_Country,France
-time_from_start,0.364
-time_from_previous_event(start),0.346
-daytime,28249.626
+time_from_start,0.018
+time_from_previous_event(start),0.018
+daytime,28249.28
 weekday,Friday
-# ACTIVITY=In Progress,2
+# ACTIVITY=In Progress,1
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

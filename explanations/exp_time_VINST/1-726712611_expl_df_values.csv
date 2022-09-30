@@ -1,7 +1,7 @@
-,8
+,4
 SR_Number,1-726712611
-Status,Accepted
-ACTIVITY,Wait - Implementation
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
 Involved_ST,M17
@@ -9,12 +9,12 @@ SR_Latest_Impact,Medium
 Product,PROD267
 Country,se
 Owner_Country,Sweden
-time_from_start,1139.538
-time_from_previous_event(start),190.25
-daytime,43571.559
+time_from_start,3.23
+time_from_previous_event(start),0.391
+daytime,42435.251
 weekday,Friday
-# ACTIVITY=In Progress,5
-# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

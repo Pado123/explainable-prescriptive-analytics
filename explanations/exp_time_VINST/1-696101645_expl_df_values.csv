@@ -1,19 +1,19 @@
-,3
+,4
 SR_Number,1-696101645
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,missing
-Involved_Org_line_3,Org line V11
-Involved_ST,V51 2nd
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,A2_1
+Involved_Org_line_3,Org line C
+Involved_ST,D2
 SR_Latest_Impact,Medium
 Product,PROD424
 Country,be
 Owner_Country,France
-time_from_start,0.707
-time_from_previous_event(start),0.502
-daytime,39148.592
+time_from_start,0.771
+time_from_previous_event(start),0.064
+daytime,39148.656
 weekday,Friday
-# ACTIVITY=In Progress,2
+# ACTIVITY=In Progress,3
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

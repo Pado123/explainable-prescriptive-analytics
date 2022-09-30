@@ -1,22 +1,22 @@
-,1
+,8
 SR_Number,1-710211491
 Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,missing
-Involved_Org_line_3,Org line F
-Involved_ST,G207 2nd
+ACTIVITY,Wait - User
+Involved_ST_Function_Div,A2_4
+Involved_Org_line_3,Org line A2
+Involved_ST,G7 3rd
 SR_Latest_Impact,Medium
 Product,PROD766
 Country,be
-Owner_Country,France
-time_from_start,0.021
-time_from_previous_event(start),0.021
-daytime,41321.615
+Owner_Country,Brazil
+time_from_start,263.48
+time_from_previous_event(start),13.708
+daytime,41585.074
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,5
+# ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

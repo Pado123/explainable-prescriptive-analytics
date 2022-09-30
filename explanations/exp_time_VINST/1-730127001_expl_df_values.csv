@@ -1,20 +1,20 @@
-,4
+,1
 SR_Number,1-730127001
 Status,Accepted
-ACTIVITY,Wait
-Involved_ST_Function_Div,A2_2
-Involved_Org_line_3,Org line A2
-Involved_ST,G22 2nd
+ACTIVITY,In Progress
+Involved_ST_Function_Div,V3_2
+Involved_Org_line_3,Org line C
+Involved_ST,G96
 SR_Latest_Impact,Medium
 Product,PROD698
 Country,fr
-Owner_Country,Sweden
-time_from_start,40.352
-time_from_previous_event(start),0.132
-daytime,42889.38
+Owner_Country,POLAND
+time_from_start,1.338
+time_from_previous_event(start),1.338
+daytime,42850.366
 weekday,Friday
-# ACTIVITY=In Progress,2
-# ACTIVITY=Awaiting Assignment,2
+# ACTIVITY=In Progress,0
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

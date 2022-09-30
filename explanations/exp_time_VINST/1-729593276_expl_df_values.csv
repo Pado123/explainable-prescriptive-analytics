@@ -1,19 +1,19 @@
-,0
+,2
 SR_Number,1-729593276
-Status,Accepted
-ACTIVITY,In Progress
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
-Involved_ST,G96
+Involved_ST,T17
 SR_Latest_Impact,Low
 Product,PROD609
 Country,fr
 Owner_Country,POLAND
-time_from_start,0.0
-time_from_previous_event(start),0.0
-daytime,42775.129
+time_from_start,0.607
+time_from_previous_event(start),0.575
+daytime,42775.736
 weekday,Friday
-# ACTIVITY=In Progress,0
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

@@ -1,20 +1,20 @@
-,1
+,5
 SR_Number,1-730005931
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Assigned
 Involved_ST_Function_Div,V3_2
-Involved_Org_line_3,Org line V11
-Involved_ST,S5
+Involved_Org_line_3,Org line C
+Involved_ST,G97
 SR_Latest_Impact,Low
 Product,PROD813
 Country,pl
-Owner_Country,Argentina
-time_from_start,0.15
-time_from_previous_event(start),0.15
-daytime,42796.978
+Owner_Country,Brazil
+time_from_start,12.568
+time_from_previous_event(start),0.061
+daytime,42809.396
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,4
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

@@ -23,68 +23,67 @@ from load_dataset import prepare_dataset
 
 
 
-
-parser = argparse.ArgumentParser(
-    description='Main script for Catboost training and creating recommendations')
-
-parser.add_argument('--filename_completed', default='data/completed.csv')
-parser.add_argument('--filename_running', default=None)
-parser.add_argument('--case_id_name', required=True, type=str)
-parser.add_argument('--activity_name', required=True, type=str)
-parser.add_argument('--start_date_name', required=True, type=str)
-parser.add_argument('--end_date_name', type=str, default=None)
-parser.add_argument('--resource_name', type=str, default=None)
-parser.add_argument('--role_name', type=str, default=None)
-parser.add_argument('--predict_activities', type=str, nargs='*', default=None)
-parser.add_argument('--retained_activities', type=str, nargs='*', default=None)
-parser.add_argument('--lost_activities', type=str, nargs='*', default=None)
-
-parser.add_argument('--date_format', default="%Y-%m-%d %H:%M:%S")
-parser.add_argument('--pred_column', default=None)
-parser.add_argument('--experiment_name', default='')
-parser.add_argument('--pred_attributes', type=str, nargs='*', default=None)
-parser.add_argument('--costs', default=None)
-parser.add_argument('--working_time', default=None)
-parser.add_argument('--mode', default="train")
-
-parser.add_argument('--shap', default=False)
-parser.add_argument('--explain', default=False)
-parser.add_argument('--override', default=True)  # if True retrains model and overrides previous one
-parser.add_argument('--num_epochs', default=500, type=int)
-parser.add_argument('--outlier_thrs', default=0.01, type=int)
-
-args = parser.parse_args()
-
-# mandatory parameters
-filename = args.filename_completed
-filename_running = args.filename_running
-case_id_name = args.case_id_name
-activity_name = args.activity_name
-start_date_name = args.start_date_name
-date_format = args.date_format
-pred_column = args.pred_column
-experiment_name = args.experiment_name
-
-# optional parameters
-end_date_name = args.end_date_name
-resource_column_name = args.resource_name
-role_column_name = args.role_name
-predict_activities = args.predict_activities
-retained_activities = args.retained_activities
-lost_activities = args.lost_activities
-shap_calculation = args.shap
-pred_attributes = args.pred_attributes
-override = args.override
-num_epochs = args.num_epochs
-shap = args.shap
-explain = args.explain
-explain = bool(explain)
-outlier_thrs = args.outlier_thrs
+#
+# parser = argparse.ArgumentParser(
+#     description='Main script for Catboost training and creating recommendations')
+#
+# parser.add_argument('--filename_completed', default='data/completed.csv')
+# parser.add_argument('--filename_running', default=None)
+# parser.add_argument('--case_id_name', required=True, type=str)
+# parser.add_argument('--activity_name', required=True, type=str)
+# parser.add_argument('--start_date_name', required=True, type=str)
+# parser.add_argument('--end_date_name', type=str, default=None)
+# parser.add_argument('--resource_name', type=str, default=None)
+# parser.add_argument('--role_name', type=str, default=None)
+# parser.add_argument('--predict_activities', type=str, nargs='*', default=None)
+# parser.add_argument('--retained_activities', type=str, nargs='*', default=None)
+# parser.add_argument('--lost_activities', type=str, nargs='*', default=None)
+#
+# parser.add_argument('--date_format', default="%Y-%m-%d %H:%M:%S")
+# parser.add_argument('--pred_column', default=None)
+# parser.add_argument('--experiment_name', default='')
+# parser.add_argument('--pred_attributes', type=str, nargs='*', default=None)
+# parser.add_argument('--costs', default=None)
+# parser.add_argument('--working_time', default=None)
+# parser.add_argument('--mode', default="train")
+#
+# parser.add_argument('--shap', default=False)
+# parser.add_argument('--explain', default=False)
+# parser.add_argument('--override', default=True)  # if True retrains model and overrides previous one
+# parser.add_argument('--num_epochs', default=500, type=int)
+# parser.add_argument('--outlier_thrs', default=0.01, type=int)
+#
+# args = parser.parse_args()
+#
+# # mandatory parameters
+# filename = args.filename_completed
+# filename_running = args.filename_running
+# case_id_name = args.case_id_name
+# activity_name = args.activity_name
+# start_date_name = args.start_date_name
+# date_format = args.date_format
+# pred_column = args.pred_column
+# experiment_name = args.experiment_name
+#
+# # optional parameters
+# end_date_name = args.end_date_name
+# resource_column_name = args.resource_name
+# role_column_name = args.role_name
+# predict_activities = args.predict_activities
+# retained_activities = args.retained_activities
+# lost_activities = args.lost_activities
+# shap_calculation = args.shap
+# pred_attributes = args.pred_attributes
+# override = args.override
+# num_epochs = args.num_epochs
+# shap = args.shap
+# explain = args.explain
+# explain = bool(explain)
+# outlier_thrs = args.outlier_thrs
 
 import dill
-#Dump your session
 filename = 'session_save.pkl'
-# dill.dump_session(filename)
+
 #Load the session again:
 dill.load_session(filename)
 
@@ -161,7 +160,6 @@ class RecSys:
         self.columns = self.X_test.columns
 
     def start_generating_recommendations(self):
-
         next_act.generate_recommendations(self.df_rec, self.df_score, self.columns, self.case_id_name, self.pred_column,
                                           self.activity_name, self.traces_hash, self.model, self.quantitative_vars, self.qualitative_vars,
                                           self.X_test, self.experiment_name, explain=self.explain, predict_activities=self.predict_activities)
@@ -172,8 +170,8 @@ prova = RecSys(filename_completed=filename, filename_running=filename_running, c
                predict_activities=predict_activities, retained_activities=retained_activities, lost_activities=lost_activities,
                shap_calculation=shap, pred_attributes=pred_attributes, override=override, num_epochs=num_epochs, shap=shap,
                explain=explain, outlier_thrs=outlier_thrs)
+
 print('Before is'+4*'\n')
-# print(prova.y_test)
 
 print('Later is')
 prova.generate_train_and_test_logs()

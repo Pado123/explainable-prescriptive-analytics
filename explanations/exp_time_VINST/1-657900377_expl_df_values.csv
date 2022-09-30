@@ -1,24 +1,24 @@
-,1
+,8
 SR_Number,1-657900377
 Status,Accepted
 ACTIVITY,In Progress
 Involved_ST_Function_Div,A2_1
 Involved_Org_line_3,Org line A2
-Involved_ST,D7
+Involved_ST,D4
 SR_Latest_Impact,Medium
 Product,PROD236
 Country,se
-Owner_Country,Sweden
-time_from_start,0.027
-time_from_previous_event(start),0.027
-daytime,35787.234
+Owner_Country,POLAND
+time_from_start,80.826
+time_from_previous_event(start),0.348
+daytime,35868.033
 weekday,Friday
-# ACTIVITY=In Progress,1
-# ACTIVITY=Awaiting Assignment,0
+# ACTIVITY=In Progress,4
+# ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
-# ACTIVITY=Wait - User,0
+# ACTIVITY=Wait - User,1
 # ACTIVITY=Wait - Implementation,0
 # ACTIVITY=Wait,0
 # ACTIVITY=Wait - Vendor,0

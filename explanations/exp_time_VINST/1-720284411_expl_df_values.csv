@@ -1,20 +1,20 @@
-,1
+,4
 SR_Number,1-720284411
-Status,Queued
-ACTIVITY,Awaiting Assignment
-Involved_ST_Function_Div,missing
-Involved_Org_line_3,Other
-Involved_ST,S18
+Status,Accepted
+ACTIVITY,Wait - User
+Involved_ST_Function_Div,D_1
+Involved_Org_line_3,Org line A2
+Involved_ST,W14 2nd
 SR_Latest_Impact,High
 Product,PROD784
 Country,pl
-Owner_Country,Japan
-time_from_start,0.071
-time_from_previous_event(start),0.071
-daytime,42329.542
+Owner_Country,POLAND
+time_from_start,19.503
+time_from_previous_event(start),15.003
+daytime,42348.974
 weekday,Friday
-# ACTIVITY=In Progress,0
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=In Progress,1
+# ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

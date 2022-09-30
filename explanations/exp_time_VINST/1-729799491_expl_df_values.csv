@@ -1,20 +1,20 @@
-,10
+,8
 SR_Number,1-729799491
-Status,Accepted
-ACTIVITY,Assigned
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,A2_1
 Involved_Org_line_3,Org line C
 Involved_ST,D5
 SR_Latest_Impact,Medium
 Product,PROD158
 Country,be
-Owner_Country,Belgium
-time_from_start,8.065
-time_from_previous_event(start),0.011
-daytime,42796.394
+Owner_Country,INDIA
+time_from_start,1.699
+time_from_previous_event(start),0.027
+daytime,42790.028
 weekday,Friday
-# ACTIVITY=In Progress,6
-# ACTIVITY=Awaiting Assignment,4
+# ACTIVITY=In Progress,5
+# ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

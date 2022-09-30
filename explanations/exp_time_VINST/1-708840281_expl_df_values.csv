@@ -1,7 +1,7 @@
-,2
+,3
 SR_Number,1-708840281
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Assigned
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line G2
 Involved_ST,S8
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD279
 Country,br
 Owner_Country,Brazil
-time_from_start,17.749
-time_from_previous_event(start),0.02
-daytime,41185.084
+time_from_start,17.781
+time_from_previous_event(start),0.032
+daytime,41185.116
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

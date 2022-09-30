@@ -1,7 +1,7 @@
-,9
+,4
 SR_Number,1-703368981
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Assigned
 Involved_ST_Function_Div,E_1
 Involved_Org_line_3,Org line C
 Involved_ST,G13 2nd
@@ -9,14 +9,14 @@ SR_Latest_Impact,Medium
 Product,PROD398
 Country,se
 Owner_Country,USA
-time_from_start,541.202
-time_from_previous_event(start),38.782
-daytime,40995.405
+time_from_start,20.122
+time_from_previous_event(start),0.014
+daytime,40474.325
 weekday,Friday
-# ACTIVITY=In Progress,5
-# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,1
+# ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

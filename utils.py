@@ -299,3 +299,40 @@ def change_history(df, activity_name):
         act = df.at[i, activity_name]
         if df.at[i, '# ' + activity_name + '=' + act]!=0: df.at[i, '# ' + activity_name + '=' + act] -= 1
     return df
+
+def convert_to_csv(filename=str):
+    if '.csv' in filename:
+        return None
+    if '.xes.gz' in filename:
+        pm4py.convert_to_dataframe(pm4py.read_xes(filename)).to_csv(path_or_buf=(filename[:-7] + '.csv'), index=None)
+        print('Conversion ok')
+        return None
+    if '.xes' in filename:
+        pm4py.convert_to_dataframe(pm4py.read_xes(filename)).to_csv(path_or_buf=(filename[:-4] + '.csv'), index=None)
+        print('Conversion ok')
+    else:
+        raise TypeError('Check the path or the log type, admitted formats : csv, xes, xes.gz')
+
+
+def modify_filename(filename):
+    if '.csv' in filename: return filename
+    if '.xes.gz' in filename: return filename[:-7] + '.csv'
+    if '.xes' in filename:
+        return filename[:-4] + '.csv'
+    else:
+        None
+
+
+def read_data(filename, start_time_col, date_format="%Y-%m-%d %H:%M:%S"):
+    if '.csv' in filename:
+        try:
+            df = pd.read_csv(filename, header=0, low_memory=False)
+        except UnicodeDecodeError:
+            df = pd.read_csv(filename, header=0, encoding="cp1252", low_memory=False)
+    elif '.parquet' in filename:
+        df = pd.read_parquet(filename, engine='pyarrow')
+    # if a datetime cast it to seconds
+    if not np.issubdtype(df[start_time_col], np.number):
+        df[start_time_col] = pd.to_datetime(df[start_time_col], format=date_format)
+        df[start_time_col] = df[start_time_col].astype(np.int64) / int(1e9)
+    return df

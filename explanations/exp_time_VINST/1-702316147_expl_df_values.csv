@@ -1,7 +1,7 @@
-,0
+,2
 SR_Number,1-702316147
 Status,Accepted
-ACTIVITY,In Progress
+ACTIVITY,Wait - Vendor
 Involved_ST_Function_Div,V3_2
 Involved_Org_line_3,Org line C
 Involved_ST,M27
@@ -9,11 +9,11 @@ SR_Latest_Impact,Low
 Product,PROD253
 Country,se
 Owner_Country,Sweden
-time_from_start,0.0
-time_from_previous_event(start),0.0
-daytime,40356.681
+time_from_start,0.02
+time_from_previous_event(start),0.006
+daytime,40356.701
 weekday,Friday
-# ACTIVITY=In Progress,0
+# ACTIVITY=In Progress,2
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

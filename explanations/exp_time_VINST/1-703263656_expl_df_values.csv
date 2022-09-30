@@ -1,7 +1,7 @@
-,4
+,5
 SR_Number,1-703263656
-Status,Queued
-ACTIVITY,Awaiting Assignment
+Status,Accepted
+ACTIVITY,In Progress
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line B
 Involved_ST,R3 2nd
@@ -9,12 +9,12 @@ SR_Latest_Impact,Low
 Product,PROD470
 Country,ru
 Owner_Country,RUSSIAN FEDERATION
-time_from_start,0.903
-time_from_previous_event(start),0.064
-daytime,40449.268
+time_from_start,9.839
+time_from_previous_event(start),8.936
+daytime,40458.204
 weekday,Friday
 # ACTIVITY=In Progress,3
-# ACTIVITY=Awaiting Assignment,1
+# ACTIVITY=Awaiting Assignment,2
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

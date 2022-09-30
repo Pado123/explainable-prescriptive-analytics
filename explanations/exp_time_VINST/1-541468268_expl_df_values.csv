@@ -1,4 +1,4 @@
-,1
+,0
 SR_Number,1-541468268
 Status,Accepted
 ACTIVITY,In Progress
@@ -9,11 +9,11 @@ SR_Latest_Impact,Medium
 Product,PROD542
 Country,nl
 Owner_Country,Belgium
-time_from_start,0.007
-time_from_previous_event(start),0.007
-daytime,18264.049
+time_from_start,0.0
+time_from_previous_event(start),0.0
+daytime,18264.042
 weekday,Friday
-# ACTIVITY=In Progress,1
+# ACTIVITY=In Progress,0
 # ACTIVITY=Awaiting Assignment,0
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0

@@ -1,20 +1,20 @@
-,7
+,4
 SR_Number,1-730069683
-Status,Accepted
-ACTIVITY,In Progress
-Involved_ST_Function_Div,V3_2
-Involved_Org_line_3,Org line C
-Involved_ST,N37
+Status,Queued
+ACTIVITY,Awaiting Assignment
+Involved_ST_Function_Div,missing
+Involved_Org_line_3,Org line V11
+Involved_ST,V57 2nd
 SR_Latest_Impact,Low
 Product,PROD364
 Country,us
 Owner_Country,USA
-time_from_start,930.628
-time_from_previous_event(start),699.376
-daytime,43743.871
+time_from_start,174.764
+time_from_previous_event(start),0.031
+daytime,42988.007
 weekday,Friday
-# ACTIVITY=In Progress,4
-# ACTIVITY=Awaiting Assignment,3
+# ACTIVITY=In Progress,3
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0

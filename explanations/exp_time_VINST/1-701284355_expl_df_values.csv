@@ -1,22 +1,22 @@
-,4
+,7
 SR_Number,1-701284355
-Status,Accepted
-ACTIVITY,In Progress
+Status,Queued
+ACTIVITY,Awaiting Assignment
 Involved_ST_Function_Div,E_10
 Involved_Org_line_3,Org line C
-Involved_ST,G220 2nd
+Involved_ST,G260 2nd
 SR_Latest_Impact,Low
 Product,PROD742
 Country,in
 Owner_Country,Sweden
-time_from_start,1.823
-time_from_previous_event(start),1.013
-daytime,40039.18
+time_from_start,4.712
+time_from_previous_event(start),1.43
+daytime,40042.069
 weekday,Friday
-# ACTIVITY=In Progress,3
+# ACTIVITY=In Progress,5
 # ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0
