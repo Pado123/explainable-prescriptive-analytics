@@ -1,7 +1,7 @@
-,8
+,10
 SR_Number,1-536444735
 Status,Accepted
-ACTIVITY,Assigned
+ACTIVITY,Wait
 Involved_ST_Function_Div,missing
 Involved_Org_line_3,Org line V7n
 Involved_ST,V32 2nd
@@ -9,14 +9,14 @@ SR_Latest_Impact,Medium
 Product,PROD542
 Country,nl
 Owner_Country,Netherlands
-time_from_start,1045.062
-time_from_previous_event(start),0.004
-daytime,17563.255
+time_from_start,24785.814
+time_from_previous_event(start),22539.403
+daytime,41304.007
 weekday,Friday
-# ACTIVITY=In Progress,5
+# ACTIVITY=In Progress,6
 # ACTIVITY=Awaiting Assignment,3
 # ACTIVITY=Resolved,0
-# ACTIVITY=Assigned,0
+# ACTIVITY=Assigned,1
 # ACTIVITY=Closed,0
 # ACTIVITY=Wait - User,0
 # ACTIVITY=Wait - Implementation,0

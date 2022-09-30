@@ -1,20 +1,20 @@
-,6
+,3
 SR_Number,1-529096847
 Status,Accepted
-ACTIVITY,Wait - User
-Involved_ST_Function_Div,A2_1
-Involved_Org_line_3,Org line A2
-Involved_ST,D8
+ACTIVITY,In Progress
+Involved_ST_Function_Div,missing
+Involved_Org_line_3,Org line V7n
+Involved_ST,V37 2nd
 SR_Latest_Impact,Medium
 Product,PROD542
 Country,nl
-Owner_Country,POLAND
-time_from_start,327.357
-time_from_previous_event(start),0.308
-daytime,14353.07
+Owner_Country,Netherlands
+time_from_start,326.664
+time_from_previous_event(start),326.139
+daytime,14352.377
 weekday,Friday
-# ACTIVITY=In Progress,4
-# ACTIVITY=Awaiting Assignment,2
+# ACTIVITY=In Progress,2
+# ACTIVITY=Awaiting Assignment,1
 # ACTIVITY=Resolved,0
 # ACTIVITY=Assigned,0
 # ACTIVITY=Closed,0
