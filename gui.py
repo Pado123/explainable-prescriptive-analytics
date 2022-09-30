@@ -72,6 +72,7 @@ def parse_contents(contents, filename, date):
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
             df.to_csv('data/curr_df.csv')
+            df.to_csv('gui_backup/curr_df.csv')
             pickle.dump(list(df.columns), open('gui_backup/col_list.pkl','wb'))
 
         elif 'xls' in filename:
@@ -111,8 +112,6 @@ app.layout = html.Div([html.Div(children=[
         )
         ),
     dbc.Col(html.Button("Analize", id="df_analyzer", n_clicks=0))]),
-    html.Div(id='dropdown-container', children=[]),
-    html.Div(id='dropdown-container-output'),
     html.Div(id='output-L_complete'),
     dcc.Textarea(
             id='textarea-state-radioitems',
@@ -129,17 +128,18 @@ app.layout = html.Div([html.Div(children=[
         labelStyle={'display': 'block'},
         id='radioitem_kpi',
     ),
+    html.Div(id='unuseful_output'),
+    html.Div(id='empy_out'),
     dcc.Textarea(
             id='textarea-state-radioitems-chooseKPI',
             value='Select the activity for which you want to optimize the occurrence',
             style={'width': '25%', 'height': 55, 'borderStyle':'None'},
             disabled='True',
         ),
-    dcc.Dropdown(act_total, 'No activity has been selected', id='dropdown_KPIactivity',
-                 style={
-                     'width': '40%',
-                 }
-                 ),
+    html.Div(id='dropdown-container', children=[]),
+    html.Div(id='dropdown-container-output'),
+    html.Div(id='dropdown_KPIactivity'),
+    html.Div(id='Empty_out'),
     html.Button('Train!', id='submit-val', n_clicks=0),
     dcc.Upload(
                     id='upload-L_train',
@@ -211,16 +211,15 @@ def render_content(value):
     Output('unuseful_output', 'children'),
     Input('radioitem_kpi', 'value'),
 )
-def chosen_kpi(value):
-    pickle.dump(value, 'gui_backup/chosen_kpi.pkl', 'wb')
-
+def chosen_kpi(radiout):
+    pickle.dump(radiout, open('gui_backup/chosen_kpi.pkl', 'wb'))
+    return None
 
 @app.callback(
     Output('figure_explanation', 'children'),
     Input('dropdown_activities', 'value'), Input('dropdown_traces', 'value')
 )
 def create_expl_fig(act, value):
-
     trace_idx = value
     act = act
 
@@ -305,6 +304,37 @@ def display_output(values):
         html.Div('Dropdown {} = {}'.format(i + 1, value))
         for (i, value) in enumerate(values)
     ])
+
+@app.callback(
+    Output('dropdown_KPIactivity', 'children'),
+    Input({'type': 'columns-dropdown', 'index': ALL}, 'value')
+)
+def print_i(value):
+    if (None not in value) and (value!=[]):
+        pickle.dump(value[0], open('gui_backup/case_id_name.pkl','wb'))
+        pickle.dump(value[1], open('gui_backup/act_name.pkl', 'wb'))
+        pickle.dump(value[2], open('gui_backup/start_date_name.pkl', 'wb'))
+        pickle.dump(value[3], open('gui_backup/resource_name.pkl', 'wb'))
+
+        if pickle.load(open('gui_backup/chosen_kpi.pkl', 'rb')) in ['Minimize the activity occurrence',
+                                                                    'Maximize the activity occurrence']:
+            act_col = value[1]
+            df = read_data(filename='gui_backup/curr_df.csv', start_time_col=value[2])
+            act_list = list(df[act_col].unique())
+            return html.Div([dcc.Dropdown(act_list, placeholder='Select the activity to optimize (optional)',
+                                          id='Act_Chosen_dropdown', style={ 'width': '75%'},)])
+
+        else: return None
+
+@app.callback(
+    Output('Empty_out', 'children'),
+    Input('Act_Chosen_dropdown', 'value')
+)
+def save_activity(value):
+    if value is not None:
+        pickle.dump(value, open('gui_backup/activity_to_optimize.pkl','wb'))
+    return None
+
 
 
 if __name__ == '__main__':
