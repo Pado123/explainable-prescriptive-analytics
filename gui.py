@@ -140,7 +140,7 @@ app.layout = html.Div([html.Div(children=[
     html.Div(id='dropdown-container-output'),
     html.Div(id='dropdown_KPIactivity'),
     html.Div(id='Empty_out'),
-    html.Button('Train!', id='submit-val', n_clicks=0),
+    html.Button('Train!', id='submit-values_and_train', n_clicks=0),
     dcc.Upload(
                     id='upload-L_train',
                     children=html.Div([
@@ -335,6 +335,13 @@ def save_activity(value):
         pickle.dump(value, open('gui_backup/activity_to_optimize.pkl','wb'))
     return None
 
+
+@app.callback(
+    Output('aspetta dhn', 'children'),
+    Input('submit-values_and_train', 'value'),
+    State('train_what_in_caso_elimina', 'children'))
+def display_dropdowns(n_clicks, value):
+    raise NotImplementedError
 
 
 if __name__ == '__main__':

@@ -170,6 +170,7 @@ elif pred_column != "independent_activity" and pred_column != "churn_activity":
         raise NotImplementedError
 
 np.random.seed(1618)  # 6415
+
 prepare_dataset(df=df, case_id_name=case_id_name, activity_column_name=activity_name, start_date_name=start_date_name,
                 date_format=date_format,
                 end_date_name=end_date_name, pred_column=pred_column, mode="train", experiment_name=experiment_name,
