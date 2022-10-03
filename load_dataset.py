@@ -1096,5 +1096,5 @@ def preprocess_df(df, case_id_name, activity_column_name, start_date_name, date_
             df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0])
         except ValueError:
             pass
-            # df.iloc[:, 0] = pd.Series(df.iloc[:, 0]).astype('category').cat.codes.values
+
         return df

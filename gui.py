@@ -9,6 +9,11 @@ import base64
 import os
 import datetime
 import pm4py
+import next_act
+import tqdm
+
+import load_dataset
+
 shap.initjs()
 
 from IO import read, folders, create_folders
@@ -29,7 +34,7 @@ import shutil
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 layout = go.Layout(
     yaxis=dict(
-        range=[-1, 12]
+        range=[12, -1]
     ),
     height=600
 )
@@ -78,9 +83,9 @@ def parse_contents(contents, filename, date):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-            df.to_csv('data/curr_df.csv')
-            df.to_csv('gui_backup/curr_df.csv')
-            pickle.dump(list(df.columns), open('gui_backup/col_list.pkl','wb'))
+            df.to_csv('data/curr_df.csv', index=None)
+            df.to_csv('gui_backup/curr_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl','wb'))
 
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
@@ -89,7 +94,6 @@ def parse_contents(contents, filename, date):
         elif '.xes' in filename:
             #Assume that it is a log
             pm4py.convert_to_dataframe(pm4py.read_xes(io.BytesIO(decoded))).to_csv(path_or_buf=(filename[:-4] + '.csv'), index=None)
-
 
     except Exception as e:
         print(e)
@@ -107,9 +111,9 @@ def parse_contents_run(contents, filename, date):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-            df.to_csv('data/run_df.csv')
-            df.to_csv('gui_backup/run_df.csv')
-            pickle.dump(list(df.columns), open('gui_backup/col_list.pkl','wb'))
+            df.to_csv('data/run_df.csv', index=None)
+            df.to_csv('gui_backup/run_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl','wb'))
 
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
@@ -173,7 +177,8 @@ app.layout = html.Div([html.Div(children=[
     html.Div(id='dropdown_KPIactivity'),
     html.Div(id='Empty_out'),
     html.Div(id='dropdown-container_2'),
-    html.Button('Train!', id='submit-values_and_train', n_clicks=0),
+    html.Div(id='dropdown-container_3'),
+    html.Button('Train', id='submit-values_and_train', n_clicks=0),
     dcc.Upload(
                     id='upload-L_run',
                     children=html.Div([
@@ -194,19 +199,8 @@ app.layout = html.Div([html.Div(children=[
                     multiple=False
                 ),
     html.Button('Generate prediction', id='generate_prediction_button', n_clicks=0),
-    dcc.Graph(
-        figure={
-            'data': [
-                {'x': [int(kpis_dict[i][1])/3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                 'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                {'x': [int(kpis_dict[i][0])/3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                 'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
-                 'marker': dict(color='rgba(0, 60, 0, 1)')},
-            ],
-
-            'layout': layout
-        },
-    ),
+    html.Button('Show Prediction', id='show_pred_button', n_clicks=0),
+    html.Div(id='figure_prediction'),
     dcc.Textarea(
         id='textarea-state-dropdown',
         value='Select the trace you want to optimize',
@@ -223,6 +217,16 @@ app.layout = html.Div([html.Div(children=[
     ),
     # html.Div(id='dropdown_traces_2'),
     dcc.Dropdown(act_total, 'No activity has been selected', id='dropdown_activities'),
+    dcc.Textarea(
+            id='textarea-state-expls',
+            value='Select how much explanations you want to see',
+            style={'width': '100%', 'height': 50},
+            disabled='True',
+        ),
+    dcc.Slider(0, 14, 1,
+                   value=10,
+                   id='my-slider'
+        ),
     html.Div(id='figure_explanation'),
     html.Br()
 ])
@@ -254,24 +258,28 @@ def chosen_kpi(radiout):
     Input('dropdown_activities', 'value'), Input('dropdown_traces', 'value')
 )
 def create_expl_fig(act, value):
-    trace_idx = value
-    act = act
+    try :
+        trace_idx = value
+        act = act
 
-    explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
-    idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
-    groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
-    last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
+        explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
+        idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
+        groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
+        last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
 
-    expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
-               "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
+        expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
+                   "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
 
-    last = last[idxs_chosen]
-    feature_names = [str(i) for i in last.index]
-    feature_values = [str(i) for i in last.values]
+        last = last[idxs_chosen]
+        feature_names = [str(i) for i in last.index]
+        feature_values = [str(i) for i in last.values]
 
-    index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
-    plot_df = pd.DataFrame(data=expl_df)
-    plot_df.index = index
+        index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
+        plot_df = pd.DataFrame(data=expl_df)
+        plot_df.index = index
+
+    except :
+        print('Explanations still not present')
 
     try:
         fig = go.Figure()
@@ -287,7 +295,7 @@ def create_expl_fig(act, value):
             name='Actual Value',
             marker_color='darkred', orientation='h'
         ))
-        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not \n the recommendation for the activity {act} and the trace {value}')
+        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not\n the recommendation for the activity {act} and the trace {value}')
         return dcc.Graph(figure=fig)
     except:
         return 'Please select one of the activities proposed above'
@@ -423,15 +431,24 @@ def train_predictor_and_hashmap(n_clicks):
         if not os.path.exists(f'expls_{experiment_name}'):
             os.mkdir(f'expls_{experiment_name}')
             print('explanation folder created')
+
+        if not os.path.exists(f'explanations/{experiment_name}'):
+            os.mkdir(f'explanations/{experiment_name}')
+            print('other explanation folder created')
+
         info = read(folders['model']['data_info'])
         X_train, X_test, y_train, y_test = utils.import_vars(experiment_name=experiment_name, case_id_name=case_id_name)
         model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred_column)
         print('Importing completed...')
 
+        X_train.to_csv('gui_backup/X_train.csv')
         print('Analyze variables...')
-        # quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_type_analysis(X_train, case_id_name,
-        #                                                                                            activity_name)
-
+        quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_type_analysis(X_train,
+                                                                                                   case_id_name,
+                                                                                                   activity_name)
+        pickle.dump(quantitative_vars, open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'wb'))
+        pickle.dump(qualitative_vars, open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'wb'))
+        pickle.dump(qualitative_trace_vars, open(f'explanations/{experiment_name}/qualitative_trace_vars.pkl', 'wb'))
 
         print('Variable analysis done')
         outlier_thrs = 0
@@ -439,9 +456,9 @@ def train_predictor_and_hashmap(n_clicks):
         print('Creating hash-map of possible next activities')
         traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
                                              thrs=outlier_thrs)
+        pickle.dump(traces_hash, open('gui_backup/transition_system.pkl', 'wb'))
         print('Hash-map created')
 
-# generate_prediction_button #TODO : useful for button
 
 @app.callback(Output('output-L_run', 'children'),
               Input('upload-L_run', 'contents'),
@@ -455,9 +472,159 @@ def update_output_2(list_of_contents, list_of_names, list_of_dates):
     if type(list_of_names)!=list:
         list_of_names = [list_of_names]
     if list_of_contents is not None:
-        children = [
-            parse_contents_run(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
+        try :
+            children = [
+                parse_contents_run(c, n, d) for c, n, d in
+                zip(list_of_contents, list_of_names, list_of_dates)]
+        except :
+            None
+
+
+
+@app.callback(
+    Output('dropdown-container_3', 'children'),
+    Input('generate_prediction_button', 'n_clicks'),
+)
+def generate_predictions(n_clicks):
+    if n_clicks > 0:
+        filename = 'gui_backup/run_df.csv'
+        convert_to_csv(filename)
+        filename = modify_filename(filename)
+        date_format = "%Y-%m-%d %H:%M:%S"
+        start_date_name = pickle.load(open('gui_backup/start_date_name.pkl', 'rb'))
+        df_rec = read_data(filename, start_date_name, date_format)
+
+        print(f'the shape of the submitted_data is {df_rec.shape}')
+        use_remaining_for_num_targets = None
+        custom_attribute_column_name = None
+        case_id_name = pickle.load(open('gui_backup/case_id_name.pkl', 'rb'))
+        activity_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
+        pred_column = pickle.load(open('gui_backup/chosen_kpi.pkl', 'rb'))
+        resource_column_name = pickle.load(open('gui_backup/resource_name.pkl', 'rb'))
+        pred_column = 'independent_activity'*(pred_column=='Minimize the activity occurrence') + \
+                      'remaining_time'*(pred_column == 'Decrease Time')
+        experiment_name = 'Gui_experiment'
+        predict_activities = [pickle.load(open('gui_backup/activity_to_optimize.pkl', 'rb'))]
+        end_date_name = None # try : pickle.load(open('gui_backup/end_date.pkl', 'rb')) except:
+        role_column_name = None #TODO: implement a function which maps the possibility of having the variable
+        override, pred_attributes, costs, working_time, lost_activities, retained_activities = True, None, None, \
+                                                                                              None, None, None
+        create_folders(folders, safe=override)
+        shap = False
+        df_rec = utils.read_data(filename='data/run_df.csv', start_time_col=start_date_name)
+        df_rec = load_dataset.preprocess_df(df=df_rec, case_id_name=case_id_name, activity_column_name=activity_name,
+                        start_date_name=start_date_name, date_format=date_format, end_date_name=end_date_name,
+                        pred_column=pred_column, mode="train", experiment_name=experiment_name, override=override,
+                        pred_attributes=pred_attributes, costs=costs, working_times=working_time,
+                        resource_column_name=resource_column_name, role_column_name=role_column_name,
+                        use_remaining_for_num_targets=use_remaining_for_num_targets,
+                        predict_activities=predict_activities, lost_activities=lost_activities,
+                        retained_activities=retained_activities,
+                        custom_attribute_column_name=custom_attribute_column_name, shap=shap)
+        print('Running Data Imported')
+        print(4*'\n')
+        print('Starting generating recommendations')
+
+        traces_hash = pickle.load(open('gui_backup/transition_system.pkl','rb'))
+        idx_list = df_rec[case_id_name].unique()
+        results = list()
+        rec_dict = dict()
+        real_dict = dict()
+        if not os.path.exists('explanations'):
+            os.mkdir('explanations')
+        if not os.path.exists(f'explanations/{experiment_name}'):
+            os.mkdir(f'explanations/{experiment_name}')
+        if not os.path.exists(f'recommendations/{experiment_name}'):
+            os.mkdir(f'recommendations/{experiment_name}')
+
+        model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred_column)
+
+        for trace_idx in tqdm.tqdm(idx_list):
+            trace = df_rec[df_rec[case_id_name] == trace_idx].reset_index(drop=True)
+            trace = trace.reset_index(drop=True)  # trace.iloc[:, :-1].reset_index(drop=True)
+            try:
+                # take activity list
+                acts = list(df_rec[df_rec[case_id_name] == trace_idx].reset_index(drop=True)[activity_name])
+
+                # Remove the last (it has been added because of the evaluation)
+                trace = trace.iloc[:-1].reset_index(drop=True)
+            except:
+                import ipdb;
+                ipdb.set_trace()
+
+            try:
+                next_activities, actual_prediciton = next_act.next_act_kpis(trace, traces_hash, model, pred_column,
+                                                                            case_id_name,activity_name,
+                                                                            quantitative_vars, qualitative_vars,
+                                                                            encoding='aggr-hist')
+            except:
+                print('Next activity not found in transition system')
+                continue
+
+            try:
+                rec_act = \
+                next_activities[next_activities['kpi_rel'] == min(next_activities['kpi_rel'])]['Next_act'].values[
+                    0]
+                other_traces = [
+                    next_activities[next_activities['kpi_rel'] != min(next_activities['kpi_rel'])]['Next_act'].values]
+            except:
+                try:
+                    if len(next_activities) == 1:
+                        print('No other traces to analyze')
+                except:
+                    print(trace_idx, 'check it')
+
+            rec_dict[trace_idx] = {i: j for i, j in zip(next_activities['Next_act'], next_activities['kpi_rel'])}
+            real_dict[trace_idx] = {acts[-1]: actual_prediciton}
+            pickle.dump(rec_dict, open(f'recommendations/{experiment_name}/rec_dict.pkl', 'wb'))
+            pickle.dump(real_dict, open(f'recommendations/{experiment_name}/real_dict.pkl', 'wb'))
+
+@app.callback(
+    Output('figure_prediction', 'children'),
+    Input('show_pred_button', 'value')
+)
+def create_expl_fig(act, value):
+    experiment_name = 'Gui_experiment'
+
+    # Read the dictionaries with the scores
+    rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
+    real_dict = pickle.load(open(f'recommendations/{experiment_name}/real_dict.pkl', 'rb'))
+
+    # Read the variables' types
+    quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
+    qualitative_vars = pickle.load(open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'rb'))
+
+    # Make a dictionary with only the best scores
+    best_scores = dict()
+    for key in rec_dict.keys():
+        best_scores[key] = {min(rec_dict[key], key=rec_dict[key].get): min(rec_dict[key].values())}
+
+    # Make a dictionary with only the 3-best activities
+    best_3_dict = dict()
+    for key in rec_dict.keys():
+        best_3_dict[key] = dict(sorted(rec_dict[key].items(), key=lambda item: item[1], reverse=False))
+        best_3_dict[key] = {k: best_3_dict[key][k] for k in list(best_3_dict[key])[:3]}
+
+    kpis_dict = dict()
+    real_dict = dict(sorted(real_dict.items(), key=lambda x: list(x[1].values())[0]))
+    # Added (list(real_dict[key].values())[0]*.1) for showing also not so good cases
+    for key in real_dict.keys():
+        if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
+                list(real_dict[key].values())[0] * .05):
+            kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
+        return dcc.Graph(
+                    figure={
+                        'data': [
+                            {'x': [int(kpis_dict[i][1]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                             'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
+                            {'x': [int(kpis_dict[i][0]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                             'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
+                             'marker': dict(color='rgba(0, 60, 0, 1)')},
+                        ],
+
+                        'layout': layout
+                    },
+                )
 
 
 if __name__ == '__main__':

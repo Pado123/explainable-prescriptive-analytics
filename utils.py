@@ -20,6 +20,7 @@ from IO import read, write, folders, create_folders
 import glob
 import itertools
 import pm4py
+import tqdm
 
 import hash_maps
 np.random.seed(1618)
@@ -53,7 +54,7 @@ def variable_type_analysis(X_train, case_id_name, activity_name):
     qualitative_trace_vars = list()
     qualitative_vars = list()
 
-    for col in X_train.columns:
+    for col in tqdm.tqdm(X_train.columns):
 
         if (col not in [case_id_name, activity_name]) and (col[0] != '#'):
             if type(X_train[col][0]) != str:

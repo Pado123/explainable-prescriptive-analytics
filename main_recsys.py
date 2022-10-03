@@ -210,7 +210,7 @@ X_train, X_test, y_train, y_test = utils.import_vars(experiment_name=experiment_
 model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred_column)
 print('Importing completed...')
 
-print('Analyze variables..')
+print('Analyze variables...')
 quantitative_vars, qualitative_trace_vars, qualitative_vars = utils.variable_type_analysis(X_train, case_id_name,
                                                                                            activity_name)
 warnings.filterwarnings("ignore")

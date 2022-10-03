@@ -204,8 +204,8 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
         except:
             None  
 
-    total_time = time.time() - start_time
-    print(f'The total execution time is {total_time}')
+    # total_time = time.time() - start_time
+    # print(f'The total execution time is {total_time}')
     if save:
         pickle.dump(results, open(f'/home/padela/Scrivania/results_backup/results_{experiment_name}.pkl', 'wb'))
     return results
