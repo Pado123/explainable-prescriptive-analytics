@@ -11,3 +11,4 @@ pm4py==2.2.25
 dash==2.6.0
 scikit-image==0.19.3
 dash_bootstrap_components==1.2.1
+thread6==0.2.0

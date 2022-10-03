@@ -837,8 +837,264 @@ def prepare_dataset(df, case_id_name, activity_column_name, start_date_name, dat
                 shapley_test = explainer.shap_values(running_data)
                 # if column_type == "Categorical":
                 #     pred_column = pred_attributes
-                explanations_running_new_logic = find_explanations_for_running_cases(
-                    shapley_test, X_test, df, pred_column)
+                explanations_running_new_logic = find_explanations_for_running_cases(shapley_test, X_test, df,
+                                                                                     pred_column)
                 write(explanations_running_new_logic, folders['results']['explanations_running'])
             df.to_csv(folders['results']['running'], index=False)
             print("Generated predictions for running cases along with explanations")
+
+def preprocess_df(df, case_id_name, activity_column_name, start_date_name, date_format,
+                    end_date_name, pred_column, experiment_name, mode='train', override=False,
+                    pred_attributes=None, costs=None, working_times=None, resource_column_name=None,
+                    role_column_name=None, use_remaining_for_num_targets=False, predict_activities=None,
+                    lost_activities=None, retained_activities=None, custom_attribute_column_name=None, grid=False, shap=False):
+
+    activity_name = activity_column_name
+    mean_reference_target = None
+    #If there are not a folder for contain indexes, create it
+    if not os.path.exists('indexes'):
+        os.mkdir('indexes')
+
+    if not (os.path.exists(f'indexes/test_idx_{case_id_name}.pkl') and os.path.exists(f'indexes/train_idx_{case_id_name}.pkl')):
+        get_split_indexes(df, case_id_name, start_date_name, train_size=.65)
+    else:
+        print('reading indexes')
+
+    if mode == "train" and pred_column == "remaining_time":
+        mean_reference_target = write_leadtime_reference_mean(df, case_id_name, start_date_name, end_date_name)
+        histogram_median_events_per_dataset(df, case_id_name, activity_column_name, start_date_name,
+                                            end_date_name)
+    df = prepare_data_and_add_features(df, case_id_name, start_date_name, date_format, end_date_name)
+
+    if "activity_duration" in df.columns:
+        df_completed_cases = df.groupby(case_id_name).agg("last")[
+            [activity_column_name, "time_from_start", "activity_duration"]].reset_index()
+        df_completed_cases["current"] = df_completed_cases["time_from_start"] + df_completed_cases["activity_duration"]
+        df_completed_cases.drop(["time_from_start", "activity_duration"], axis=1, inplace=True)
+    else:
+        df_completed_cases = df.groupby(case_id_name).agg("last")[
+            [activity_column_name, "time_from_start"]].reset_index()
+        df_completed_cases["current"] = df_completed_cases["time_from_start"]
+        df_completed_cases.drop(["time_from_start"], axis=1, inplace=True)
+    df_completed_cases.rename(columns={case_id_name: "CASE ID", activity_column_name: "Activity"}, inplace=True)
+    if costs is not None:
+        try:
+            df = calculate_costs(df, costs, working_times, activity_column_name, resource_column_name,
+                                 role_column_name, case_id_name)
+            if pred_column == "case_cost" and mode == "train":
+                mean_reference_target = write_costs_reference_mean(df, case_id_name)
+        except Exception as e:
+            print(traceback.format_exc(), '\nContinuing')
+            pass
+    if mode == "train":
+        mean_events = round(np.mean(df.groupby(case_id_name).count()[activity_column_name]))
+        if grid is True:
+            history = ["no history", "aggr hist"]
+            for i in range(1, mean_events + 1):
+                history.append(i)
+            # end is needed if we try all models and validation curve is still decreasing (edge case)
+            history.append("end")
+        else:
+            history = ["aggr hist"]
+        df_original = df.copy()
+        end = False
+    else:
+        history = [read(folders['model']['params'])["history"]]
+
+    case_level_attributes = new_case_level_attribute_detection(df, case_id_name, mode)
+    for model_type in history:
+        if mode == "train":
+            if exists(folders['model']['params']):
+                if "history" in read(folders['model']['params']) or model_type == "end":
+                    model_type = read(folders['model']['params'])["history"]
+                    end = True
+            df = df_original.copy()
+        df = apply_history_to_df(df, case_id_name, activity_column_name, model_type, case_level_attributes)
+        # if target column != remaining time exclude target column
+        if pred_column != 'remaining_time' and mode == "train":
+            if pred_column == "independent_activity":
+                event_level = 1
+                pred_attributes = predict_activities[0]
+                pred_column = activity_column_name
+            elif pred_column == "churn_activity":
+                event_level = 1
+                pred_attributes = retained_activities
+                pred_column = activity_column_name
+            elif pred_column == "custom_attribute":
+                # this follows the same path as independent_activity
+                event_level = 1
+                pred_attributes = pred_attributes[0]
+                pred_column = custom_attribute_column_name
+            else:
+                event_level = detect_case_level_attribute(df, pred_column)
+            if event_level == 0:
+                # case level - test column as is
+                if np.issubdtype(df[pred_column], np.number):
+                    # take target numeric column as is
+                    column_type = 'Numeric'
+                    target_column = df[pred_column].reset_index(drop=True)
+                    target_column_name = pred_column
+                    # add temporary column to know which rows delete later (remaining_time=0)
+                    target_column = pd.concat([target_column, df['remaining_time']], axis=1)
+                    del df[pred_column]
+                else:
+                    # case level string (you want to discover if a client recess will be performed)
+                    column_type = 'Categorical'
+                    # add one more test column for every value to be predicted
+                    for value in pred_attributes:
+                        df[value] = 0
+                    # assign 1 to the column corresponding to that value
+                    for value in pred_attributes:
+                        df.loc[df[pred_column] == value, value] = 1
+                    # eliminate old test column and take columns that are one-hot encoded test
+                    del df[pred_column]
+                    target_column = df[pred_attributes]
+                    target_column_name = pred_attributes
+                    df.drop(pred_attributes, axis=1, inplace=True)
+                    target_column = target_column.join(df['remaining_time'])
+            else:
+                # event level attribute prediction
+                if np.issubdtype(df[pred_column], np.number):
+                    column_type = 'Numeric'
+                    # if a number you want to discover the final value of the attribute (ex invoice amount)
+                    df_last_attribute = df.groupby(case_id_name)[pred_column].agg(['last']).reset_index()
+                    target_column = df[case_id_name].map(df_last_attribute.set_index(case_id_name)['last'])
+                    if use_remaining_for_num_targets:
+                        # now we predict remaining attribute (e.g. remaining cost)
+                        target_column = target_column - df[pred_column]
+                    # if you don't add y to the name you already have the same column in x, when you add the y-column
+                    # after normalizing
+                    target_column_name = 'Y_COLUMN_' + pred_column
+                    target_column = pd.concat([target_column, df['remaining_time']], axis=1)
+                else:
+                    # TODO: target column could be calculated only once for all history models when using grid
+                    # you want to discover if a certain activity will be performed
+                    # set 1 for each case until that activity happens, the rest 0
+                    if pred_column == activity_column_name and not type(pred_attributes) == np.str:
+                        target_column_name = "retained_activity"
+                        df[target_column_name] = 0
+                    else:
+                        # this is the case for single independent activity or custom attribute
+                        df[pred_attributes] = 0
+                    # multiple end activities (churn) are monitored together
+                    if not type(pred_attributes) == np.str:
+                        case_ids = []
+                        for pred_attribute in pred_attributes:
+                            case_ids.extend(
+                                df.loc[df[activity_column_name] == pred_attribute][case_id_name].unique().tolist())
+                    else:
+                        case_ids = df.loc[df[pred_column] == pred_attributes][case_id_name].unique()
+                    if type(pred_attributes) == np.str:
+                        df.reset_index(inplace=True)
+                        # take start indexes of cases that contain that activity
+                        # and the index where there is the last target activity for that case
+                        start_case_indexes = \
+                            df.loc[df[case_id_name].isin(case_ids)].groupby(case_id_name, as_index=False).agg('first')[
+                                'index']
+                        last_observed_activity_indexes = \
+                            df.loc[(df[case_id_name].isin(case_ids)) & (
+                                        df[activity_column_name] == pred_attributes)].groupby(
+                                case_id_name).agg('last')['index']
+                        df_indexes = pd.concat([start_case_indexes.reset_index(drop=True),
+                                                last_observed_activity_indexes.reset_index(drop=True).rename(
+                                                    "index_1")],
+                                               axis=1)
+                        index_list = []
+                        for x, y in zip(df_indexes['index'], df_indexes['index_1']):
+                            for index in range(x, y):
+                                index_list.append(index)
+                        del df["index"]
+                        df.loc[df.index.isin(index_list), pred_attributes] = 1
+                    else:
+                        # TODO: make this more efficient also for churn prediction
+                        for case_id in case_ids:
+                            for pred_attribute in pred_attributes:
+                                index = df.loc[
+                                    (df[case_id_name] == case_id) & (df[activity_column_name] == pred_attribute)].index
+                                # each case id corresponds to one end activity only
+                                if len(index) != 0:
+                                    break
+                        if len(index) == 1:
+                            index = index[0]
+                        else:
+                            # if activity is performed more than once, take only the last
+                            index = index[-1]
+                        # put 1 to all y_targets before that activity in the case
+                        df.loc[(df[case_id_name] == case_id) & (df.index < index), target_column_name] = 1
+                    column_type = 'Categorical'
+
+                    # we take only the columns we are interested in
+                    if not type(pred_attributes) == np.str:
+                        target_column = df[target_column_name]
+                        df.drop(target_column_name, axis=1, inplace=True)
+                    else:
+                        target_column = df[pred_attributes]
+                        target_column_name = pred_attributes
+                        df.drop(pred_attributes, axis=1, inplace=True)
+                    target_column = pd.concat([target_column, df["remaining_time"]], axis=1)
+            print("Calculated target column")
+        elif pred_column == 'remaining_time' and mode == "train":
+            column_type = 'Numeric'
+            if use_remaining_for_num_targets:
+                event_level = 1
+                target_column_name = 'remaining_time'
+            else:
+                event_level = 0
+                if end_date_name is not None:
+                    leadtime_per_case = df.groupby(case_id_name).agg("first")["activity_duration"] \
+                                        + df.groupby(case_id_name).agg("first")["remaining_time"]
+                else:
+                    leadtime_per_case = df.groupby(case_id_name).agg("first")["remaining_time"]
+                df["lead_time"] = df[case_id_name].map(leadtime_per_case)
+                target_column_name = 'lead_time'
+
+            # remove rows where remaining_time=0
+            df = df[df.loc[:, 'remaining_time'] != 0].reset_index(drop=True)
+
+            if use_remaining_for_num_targets:
+                target_column = df.loc[:, 'remaining_time'].reset_index(drop=True)
+            else:
+                target_column = df.loc[:, 'lead_time'].reset_index(drop=True)
+                del df["remaining_time"]
+            del df[target_column_name]
+            print("Calculated target column")
+        else:
+            # case when you have true data to be predicted (running cases)
+            cases = read(folders['model']['data_info'])
+            type_test = cases['test']
+            target_column_name = cases['y_columns']
+            if type_test == "event":
+                # clean name (you have this when you save event-level column)
+                cleaned_names = []
+                for name in target_column_name:
+                    cleaned_names.append(name.replace('Y_COLUMN_', ''))
+                target_column_name = cleaned_names
+            # we don't have target column in true test
+            target_column = None
+            # if attribute is of type case remove it from the dataset (in the train it hasn't been seen, but here you
+            # have it)
+            # if type_test == 'case':
+            #     del df[pred_column]
+            # hotfix
+            try:
+                del df['remaining_time']
+            except KeyError:
+                pass
+        # eliminate rows where remaining time = 0 (nothing to predict) - only in train
+        if mode == "train" and pred_column != 'remaining_time':
+            df = df[df.loc[:, 'remaining_time'] != 0].reset_index(drop=True)
+            target_column = target_column[target_column.loc[:, 'remaining_time'] != 0].reset_index(drop=True)
+            del df['remaining_time']
+            del target_column['remaining_time']
+
+        # convert case id series to string and cut spaces if we have dirty data (both int and string)
+        df.iloc[:, 0] = df.iloc[:, 0].apply(str)
+        df.iloc[:, 0] = df.iloc[:, 0].apply(lambda x: x.strip())
+        test_case_ids = df.iloc[:, 0]
+        # convert back to int in order to use median (if it is a string convert to categoric int values)
+        try:
+            df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0])
+        except ValueError:
+            pass
+            # df.iloc[:, 0] = pd.Series(df.iloc[:, 0]).astype('category').cat.codes.values
+        return df

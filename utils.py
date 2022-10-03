@@ -19,6 +19,7 @@ import catboost
 from IO import read, write, folders, create_folders
 import glob
 import itertools
+import pm4py
 
 import hash_maps
 np.random.seed(1618)
@@ -336,3 +337,5 @@ def read_data(filename, start_time_col, date_format="%Y-%m-%d %H:%M:%S"):
         df[start_time_col] = pd.to_datetime(df[start_time_col], format=date_format)
         df[start_time_col] = df[start_time_col].astype(np.int64) / int(1e9)
     return df
+
+

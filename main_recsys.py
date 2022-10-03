@@ -146,6 +146,7 @@ if filename_running is not None:
     df_running = read_data(filename_running, args.start_date_name, args.date_format)
     print(df_running.shape)
 
+
 create_folders(folders, safe=override)
 
 use_remaining_for_num_targets = None
