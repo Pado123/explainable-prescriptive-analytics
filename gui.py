@@ -210,7 +210,7 @@ app.layout = html.Div([html.Div(children=[
         style={'width': '100%', 'height': 50},
         disabled='True',
     ),
-    dcc.Dropdown(list(kpis_dict.keys())[::-1], list(kpis_dict.keys())[0], id='dropdown_traces'),
+    html.Div(id='dropdown_traces_id'),
     html.Div(id='table_activities'),
     dcc.Textarea(
         id='textarea-state-activity-choice',
@@ -218,8 +218,7 @@ app.layout = html.Div([html.Div(children=[
         style={'width': '100%', 'height': 50},
         disabled='True',
     ),
-    # html.Div(id='dropdown_traces_2'),
-    dcc.Dropdown(act_total, 'No activity has been selected', id='dropdown_activities'),
+    html.Div(id='dropdown_activities'),
     dcc.Textarea(
             id='textarea-state-expls',
             value='Select how much explanations you want to see',
@@ -237,16 +236,6 @@ app.layout = html.Div([html.Div(children=[
 )
 
 
-@app.callback(
-    Output('table_activities', 'children'),
-    Input('dropdown_traces', 'value')
-)
-def render_content(value):
-    dict_id = best_3_dict[value]
-    df = pd.DataFrame(columns=['Next Activity', 'Expected KPI'])
-    for i in range(len(dict_id.keys())):
-        df.loc[i] = np.array([list(dict_id.keys())[i], dict_id[list(dict_id.keys())[i]]])
-    return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
 
 @app.callback(
     Output('unuseful_output', 'children'),
@@ -256,52 +245,6 @@ def chosen_kpi(radiout):
     pickle.dump(radiout, open('gui_backup/chosen_kpi.pkl', 'wb'))
     return None
 
-@app.callback(
-    Output('figure_explanation', 'children'),
-    Input('dropdown_activities', 'value'), Input('dropdown_traces', 'value')
-)
-def create_expl_fig(act, value):
-    try :
-        trace_idx = value
-        act = act
-
-        explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
-        idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
-        groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
-        last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
-
-        expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
-                   "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
-
-        last = last[idxs_chosen]
-        feature_names = [str(i) for i in last.index]
-        feature_values = [str(i) for i in last.values]
-
-        index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
-        plot_df = pd.DataFrame(data=expl_df)
-        plot_df.index = index
-
-    except :
-        print('Explanations still not present')
-
-    try:
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=list(expl_df['Following Recommendation']),
-            y=list(index),
-            name='Following recommendation',
-            marker_color='darkgreen',orientation='h'
-        ))
-        fig.add_trace(go.Bar(
-            x=list(expl_df['Actual Value']),
-            y=list(index),
-            name='Actual Value',
-            marker_color='darkred', orientation='h'
-        ))
-        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not\n the recommendation for the activity {act} and the trace {value}')
-        return dcc.Graph(figure=fig)
-    except:
-        return 'Please select one of the activities proposed above'
 
 @app.callback(Output('output-L_complete', 'children'),
               Input('upload-L_complete', 'contents'),
@@ -367,7 +310,7 @@ def print_i(value):
             df = read_data(filename='gui_backup/curr_df.csv', start_time_col=value[2])
             act_list = list(df[act_col].unique())
             return html.Div([dcc.Dropdown(act_list, placeholder='Select the activity to optimize (optional)',
-                                          id='Act_Chosen_dropdown', style={'width': '75%'},)])
+                                          style={'width': '75%'},)])
 
         else: return None
 
@@ -586,54 +529,150 @@ def generate_predictions(n_clicks):
 
 @app.callback(
     Output('figure_prediction', 'children'),
-    Input('show_pred_button', 'value')
+    Input('show_pred_button', 'n_clicks')
+)
+def create_expl_fig(n_clicks):
+    if n_clicks > 0 :
+        experiment_name = 'Gui_experiment'
+
+        # Read the dictionaries with the scores
+        rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
+        real_dict = pickle.load(open(f'recommendations/{experiment_name}/real_dict.pkl', 'rb'))
+
+        # Read the variables' types
+        quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
+        qualitative_vars = pickle.load(open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'rb'))
+
+        # Make a dictionary with only the best scores
+        best_scores = dict()
+        for key in rec_dict.keys():
+            best_scores[key] = {min(rec_dict[key], key=rec_dict[key].get): min(rec_dict[key].values())}
+
+        # Make a dictionary with only the 3-best activities
+        best_3_dict = dict()
+        for key in rec_dict.keys():
+            best_3_dict[key] = dict(sorted(rec_dict[key].items(), key=lambda item: item[1], reverse=False))
+            best_3_dict[key] = {k: best_3_dict[key][k] for k in list(best_3_dict[key])[:3]}
+
+        kpis_dict = dict()
+        real_dict = dict(sorted(real_dict.items(), key=lambda x: list(x[1].values())[0]))
+        # Added (list(real_dict[key].values())[0]*.1) for showing also not so good cases
+        for key in real_dict.keys():
+            if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
+                    list(real_dict[key].values())[0] * .05):
+                kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
+        layout = get_layout(real_dict)
+        return dcc.Graph(
+                    figure={
+                        'data': [
+                            {'x': [int(kpis_dict[i][1]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                             'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
+                            {'x': [int(kpis_dict[i][0]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                             'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
+                             'marker': dict(color='rgba(0, 60, 0, 1)')},
+                        ],
+                        'layout': layout
+                    },
+                )
+    else :
+        return None
+
+
+
+
+
+@app.callback(
+    Output('dropdown_traces_id', 'children'),
+    Input('show_pred_button', 'n_clicks')
+)
+def show_trace_dropdown(n_clicks):
+    if n_clicks > 0:
+        real_dict = pickle.load(open(f'recommendations/{experiment_name}/real_dict.pkl', 'rb'))
+        return dcc.Dropdown(list(real_dict.keys())[::-1], list(real_dict.keys())[0], id='dropdown_traces_id')
+
+@app.callback(
+    [Output('table_activities', 'children'), Output('dropdown_activities', 'children')],
+    Input('dropdown_traces_id', 'value')
+)
+def save_result(value):
+    if value is not None:
+        try:
+            # pickle.dump(value, open('gui_backup/chosen_trace.pkl', 'wb'))
+
+            act_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
+            acts = list(pd.read_csv('gui_backup/X_train.csv')[act_name].unique())
+            experiment_name = 'Gui_experiment'
+            best_3_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
+            # value = pickle.load(open('gui_backup/chosen_trace.pkl', 'rb'))
+            dict_id = best_3_dict[value]
+            dict_id = dict(sorted(dict_id.items(), key=lambda x: x[1]))
+            dict_id = {A: N for (A, N) in [x for x in dict_id.items()][:3]}
+            pickle.dump(dict_id, open('gui_backup/best_act_dict.pkl','wb'))
+            df = pd.DataFrame(columns=['Next Activity', 'Expected KPI'])
+
+            for i in range(len(dict_id.keys())):
+                df.loc[i] = np.array([list(dict_id.keys())[i], dict_id[list(dict_id.keys())[i]]])
+            return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns]), \
+                   dcc.Dropdown(acts, 'No activity has been selected', id='dropdown_activities')
+        except :
+            return "Running not executed, please insert a running log a generate recommendations"
+
+
+@app.callback(
+    Output('figure_explanation', 'children'),
+    Input('dropdown_activities', 'value')
 )
 def create_expl_fig(value):
-    experiment_name = 'Gui_experiment'
+    try :
+        trace_idx =
+        act = value
 
-    # Read the dictionaries with the scores
-    rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
-    real_dict = pickle.load(open(f'recommendations/{experiment_name}/real_dict.pkl', 'rb'))
+        explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
+        idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
+        groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
+        last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
 
-    # Read the variables' types
-    quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
-    qualitative_vars = pickle.load(open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'rb'))
+        expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
+                   "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
 
-    # Make a dictionary with only the best scores
-    best_scores = dict()
-    for key in rec_dict.keys():
-        best_scores[key] = {min(rec_dict[key], key=rec_dict[key].get): min(rec_dict[key].values())}
+        last = last[idxs_chosen]
+        feature_names = [str(i) for i in last.index]
+        feature_values = [str(i) for i in last.values]
 
-    # Make a dictionary with only the 3-best activities
-    best_3_dict = dict()
-    for key in rec_dict.keys():
-        best_3_dict[key] = dict(sorted(rec_dict[key].items(), key=lambda item: item[1], reverse=False))
-        best_3_dict[key] = {k: best_3_dict[key][k] for k in list(best_3_dict[key])[:3]}
+        index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
+        plot_df = pd.DataFrame(data=expl_df)
+        plot_df.index = index
 
-    kpis_dict = dict()
-    real_dict = dict(sorted(real_dict.items(), key=lambda x: list(x[1].values())[0]))
-    # Added (list(real_dict[key].values())[0]*.1) for showing also not so good cases
-    for key in real_dict.keys():
-        if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
-                list(real_dict[key].values())[0] * .05):
-            kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
-    layout = get_layout(real_dict)
-    return dcc.Graph(
-                figure={
-                    'data': [
-                        {'x': [int(kpis_dict[i][1]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                         'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                        {'x': [int(kpis_dict[i][0]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                         'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
-                         'marker': dict(color='rgba(0, 60, 0, 1)')},
-                    ],
-                    'layout': layout
-                },
-            )
+    except :
+        print('Explanations still not present')
+
+    try:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=list(expl_df['Following Recommendation']),
+            y=list(index),
+            name='Following recommendation',
+            marker_color='darkgreen',orientation='h'
+        ))
+        fig.add_trace(go.Bar(
+            x=list(expl_df['Actual Value']),
+            y=list(index),
+            name='Actual Value',
+            marker_color='darkred', orientation='h'
+        ))
+        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not\n the recommendation for the activity {act} and the trace {value}')
+        return dcc.Graph(figure=fig)
+    except:
+        return 'Please select one of the activities proposed above'
 
 
+#
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', debug=True)
+
+
+
+
 
 
 
