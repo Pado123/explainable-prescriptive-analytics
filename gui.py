@@ -32,12 +32,15 @@ import utils
 import shutil
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-layout = go.Layout(
-    yaxis=dict(
-        range=[12, -1]
-    ),
-    height=600
-)
+
+def get_layout(d):
+    layout = go.Layout(
+        yaxis=dict(
+            range=[len(d), len(d)-20]
+        ),
+        height=600
+    )
+    return layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -318,10 +321,10 @@ def display_dropdowns(n_clicks, children):
     children = list()
     if n_clicks >= 1:
         for i in range(4):
-            if i == 0:name = 'Select the Case Id column'
-            elif i == 1: name = 'Select the Activity column'
-            elif i == 2: name = 'Select the Start Date column'
-            elif i == 3: name = 'Select the ResourceName column (optional)'
+            if i == 0:name = 'Select the case id column'
+            elif i == 1: name = 'Select the activity column'
+            elif i == 2: name = 'Select the timestamp column'
+            elif i == 3: name = 'Select the resourcename column (optional)'
 
             new_dropdown = dcc.Dropdown(
                         pickle.load(open('gui_backup/col_list.pkl','rb')),
@@ -364,7 +367,7 @@ def print_i(value):
             df = read_data(filename='gui_backup/curr_df.csv', start_time_col=value[2])
             act_list = list(df[act_col].unique())
             return html.Div([dcc.Dropdown(act_list, placeholder='Select the activity to optimize (optional)',
-                                          id='Act_Chosen_dropdown', style={ 'width': '75%'},)])
+                                          id='Act_Chosen_dropdown', style={'width': '75%'},)])
 
         else: return None
 
@@ -451,13 +454,7 @@ def train_predictor_and_hashmap(n_clicks):
         pickle.dump(qualitative_trace_vars, open(f'explanations/{experiment_name}/qualitative_trace_vars.pkl', 'wb'))
 
         print('Variable analysis done')
-        outlier_thrs = 0
-
-        print('Creating hash-map of possible next activities')
-        traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
-                                             thrs=outlier_thrs)
-        pickle.dump(traces_hash, open('gui_backup/transition_system.pkl', 'wb'))
-        print('Hash-map created')
+        return print('Training finished')
 
 
 @app.callback(Output('output-L_run', 'children'),
@@ -501,8 +498,9 @@ def generate_predictions(n_clicks):
         activity_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
         pred_column = pickle.load(open('gui_backup/chosen_kpi.pkl', 'rb'))
         resource_column_name = pickle.load(open('gui_backup/resource_name.pkl', 'rb'))
-        pred_column = 'independent_activity'*(pred_column=='Minimize the activity occurrence') + \
-                      'remaining_time'*(pred_column == 'Decrease Time')
+        if pred_column not in ['independent_activity','remaining_time'] :
+            pred_column = 'independent_activity'*(pred_column=='Minimize the activity occurrence') + \
+                          'remaining_time'*(pred_column == 'Decrease Time')
         experiment_name = 'Gui_experiment'
         predict_activities = [pickle.load(open('gui_backup/activity_to_optimize.pkl', 'rb'))]
         end_date_name = None # try : pickle.load(open('gui_backup/end_date.pkl', 'rb')) except:
@@ -525,7 +523,14 @@ def generate_predictions(n_clicks):
         print(4*'\n')
         print('Starting generating recommendations')
 
-        traces_hash = pickle.load(open('gui_backup/transition_system.pkl','rb'))
+        outlier_thrs = 0
+
+        print('Creating hash-map of possible next activities')
+        X_train = pd.read_csv('gui_backup/X_train.csv').iloc[:,1:]
+        traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
+                                             thrs=outlier_thrs)
+        print('Hash-map created')
+
         idx_list = df_rec[case_id_name].unique()
         results = list()
         rec_dict = dict()
@@ -583,7 +588,7 @@ def generate_predictions(n_clicks):
     Output('figure_prediction', 'children'),
     Input('show_pred_button', 'value')
 )
-def create_expl_fig(act, value):
+def create_expl_fig(value):
     experiment_name = 'Gui_experiment'
 
     # Read the dictionaries with the scores
@@ -612,20 +617,45 @@ def create_expl_fig(act, value):
         if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
                 list(real_dict[key].values())[0] * .05):
             kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
-        return dcc.Graph(
-                    figure={
-                        'data': [
-                            {'x': [int(kpis_dict[i][1]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                             'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                            {'x': [int(kpis_dict[i][0]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                             'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
-                             'marker': dict(color='rgba(0, 60, 0, 1)')},
-                        ],
-
-                        'layout': layout
-                    },
-                )
+    layout = get_layout(real_dict)
+    return dcc.Graph(
+                figure={
+                    'data': [
+                        {'x': [int(kpis_dict[i][1]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                         'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
+                        {'x': [int(kpis_dict[i][0]) / 3600 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                         'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
+                         'marker': dict(color='rgba(0, 60, 0, 1)')},
+                    ],
+                    'layout': layout
+                },
+            )
 
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -61,6 +61,8 @@ def read_data(filename, start_time_col, date_format="%Y-%m-%d %H:%M:%S"):
     if '.csv' in filename:
         try:
             df = pd.read_csv(filename, header=0, low_memory=False)
+            # if df.columns[0]=='Unnamed: 0':
+            #     df = df.iloc[:,1:]
         except UnicodeDecodeError:
             df = pd.read_csv(filename, header=0, encoding="cp1252", low_memory=False)
     elif '.parquet' in filename:

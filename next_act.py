@@ -31,6 +31,9 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
     if encoding is None:
         raise NotImplementedError()
 
+    if 'Unnamed: 0' in trace.columns:
+        del trace['Unnamed: 0']
+
     if encoding == 'aggr-hist':
         trace_acts = list(trace[activity_name])
         # trace = trace[[col for col in trace.columns if col!='REQUEST_ID']]
@@ -50,7 +53,7 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
 
         # Create a vector with the actual prediction
         if pred_column == 'remaining_time':
-            last['# ACTIVITY=' + last_act] += 1
+            # last['# ACTIVITY=' + last_act] += 1
             actual_prediction = model.predict(list(last)[1:])
         elif pred_column == 'independent_activity':
             actual_prediction = model.predict_proba(list(last)[1:])[0]  # activity case
