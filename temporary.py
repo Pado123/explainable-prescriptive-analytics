@@ -5,14 +5,15 @@ import tqdm
 
 os.getcwd()
 
-df = pd.read_csv('data/VINST cases incidents.csv')
+df = pd.read_csv('data/completed.csv')
 df_run = pd.DataFrame(columns=df.columns)
-for idx in tqdm.tqdm(df['SR_Number'].unique()):
-    trace = df[df['SR_Number'] == idx]
-    trace = trace.iloc[:int(len(trace)*.55)]
+for idx in tqdm.tqdm(df['REQUEST_ID'].unique()):
+    trace = df[df['REQUEST_ID'] == idx]
+    trace = trace.iloc[:int(len(trace)*.80)]
     df_run = pd.concat([df_run, trace])
 df_run.reset_index(drop=True, inplace=True)
 print('Finito<>vez')
+df_run.to_csv('data/bac_running.csv')
 
 # import threading
 # import time

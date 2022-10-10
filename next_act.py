@@ -34,6 +34,16 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
     if 'Unnamed: 0' in trace.columns:
         del trace['Unnamed: 0']
 
+    if set(trace.columns) != set(model.feature_names_):
+        for colname in set(model.feature_names_) - set(trace.columns):
+            trace[colname] = np.zeros(len(trace))
+
+    trace = trace[list(model.feature_names_)]
+    try :
+        del trace[case_id_name]
+    except :
+        None
+
     if encoding == 'aggr-hist':
         trace_acts = list(trace[activity_name])
         # trace = trace[[col for col in trace.columns if col!='REQUEST_ID']]
@@ -54,9 +64,9 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
         # Create a vector with the actual prediction
         if pred_column == 'remaining_time':
             # last['# ACTIVITY=' + last_act] += 1
-            actual_prediction = model.predict(list(last)[1:])
+            actual_prediction = model.predict(list(last))
         elif pred_column == 'independent_activity':
-            actual_prediction = model.predict_proba(list(last)[1:])[0]  # activity case
+            actual_prediction = model.predict_proba(list(last))[0]  # activity case
 
         # Update history
         last['# ACTIVITY=' + last_act] += 1
@@ -66,9 +76,9 @@ def next_act_kpis(trace, traces_hash, model, pred_column, case_id_name, activity
             last[activity_name] = next_act
 
             if pred_column == 'remaining_time' :
-                kpis[next_act] = model.predict(list(last)[1:])
+                kpis[next_act] = model.predict(list(last))
             elif pred_column == 'independent_activity':
-                kpis[next_act] = model.predict_proba(list(last)[1:])[0] # activity case
+                kpis[next_act] = model.predict_proba(list(last))[0] # activity case
 
         df_final = pd.DataFrame(columns=['Trace', 'Next_act', 'kpi_rel'])
         for idx in range(len(kpis)):
@@ -162,6 +172,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
         pickle.dump(real_dict, open(f'recommendations/{experiment_name}/real_dict.pkl', 'wb'))
 
         print(f'The suggested activity is {rec_act}')
+        import ipdb; ipdb.set_trace()
         if explain:
             trace_exp = trace.copy()
             start = time.time()
