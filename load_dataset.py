@@ -762,7 +762,8 @@ def prepare_dataset(df, case_id_name, activity_column_name, start_date_name, dat
         except ValueError:
             pass
             # df.iloc[:, 0] = pd.Series(df.iloc[:, 0]).astype('category').cat.codes.values
-
+        import time
+        print(f'final preprocessing time is {time.time()}')
         if mode == "train":
             prepare_data_for_ml_model_and_predict(df, target_column, target_column_name, event_level, column_type, mode,
                                                   experiment_name, override, activity_column_name, pred_column,

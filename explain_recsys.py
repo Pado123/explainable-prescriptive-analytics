@@ -30,21 +30,14 @@ def evaluate_shap_vals(trace, model, X_test, case_id_name):
 
 def plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act):
 
-
-
-    groundtruth_explanation = pd.read_csv('explanations/exp_time_VINST/1-516553982_expl_df_gt.csv')
-    explanations = pd.read_csv('explanations/exp_time_VINST/1-516553982_Assigned_expl_df.csv')
-    groundtruth_explanation = pd.Series(groundtruth_explanation['0'].values, index=groundtruth_explanation['Unnamed: 0'].values)
-    explanations =  pd.Series(explanations['0'].values, index=explanations['Unnamed: 0'].values)
-    idxs_chosen = ['ACTIVITY', 'Product', 'Owner_Country', 'time_from_start']
-
     # Python dictionary
     expl_df = {"Following Recommendation": [i for i in explanations[idxs_chosen].sort_values(ascending=False).values],
-                          "Current Value": [i for i in groundtruth_explanation[idxs_chosen].sort_values(ascending=False).values]};
+                          "Actual Value": [i for i in groundtruth_explanation[idxs_chosen].sort_values(ascending=False).values]};
 
-    # last = explanations[idxs_chosen]
-    feature_names = [str(i) for i in idxs_chosen]
-    feature_values = [str(i) for i in range(len(idxs_chosen))]
+    last = last[idxs_chosen]
+
+    feature_names = [str(i) for i in last.index]
+    feature_values = [str(i) for i in last.values]
 
     index = [feature_names[i]+'='+feature_values[i] for i in range(len(feature_values))]
     # Python dictionary into a pandas DataFrame
@@ -52,10 +45,9 @@ def plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, l
     dataFrame = pd.DataFrame(data=expl_df)
 
     dataFrame.index = index
-    dataFrame['Following Recommendation'] = [float(i) for i in dataFrame['Following Recommendation']]
-    dataFrame['Current Value'] = [float(i) for i in dataFrame['Current Value']]
+
     dataFrame.plot.barh(rot=0,
-                        title=f"How variables contribution on \n KPI changes, performing or not",
+                        title=f"How variables contribution on \n KPI changes, ",
                         color=['darkgreen', 'darkred'])
     plt.tick_params(
         axis='x',  # changes apply to the x-axis
@@ -64,6 +56,5 @@ def plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, l
         top=False,  # ticks along the top edge are off
         labelbottom=False)
     plt.tight_layout(pad=0)
-    plt.savefig(f'legend.png')
-    # plt.savefig(f'explanations/{experiment_name}/{trace_idx}_{act}.png')
+    plt.savefig(f'figure.png')
     plt.close()

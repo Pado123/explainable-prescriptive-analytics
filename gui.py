@@ -34,7 +34,10 @@ import utils
 import shutil
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
+expl_df = pd.DataFrame(columns=['Following Recommendation', 'Actual Value'])
+index = ['#ACTIVITY=Wait - Implementation=0', 'Product=PROD24', 'Country=pl', 'ACTIVITY=Awaiting Assignment']
+expl_df['Following Recommendation'] = [0.68, 0.43, -0.08, -0.43]
+expl_df['Actual Value'] = [0.78, 0.45, 0.12, -0.29]
 def get_layout(d):
     layout = go.Layout(
         yaxis=dict(
@@ -542,6 +545,8 @@ def generate_predictions(n_clicks):
 
             rec_dict[trace_idx] = {i: j for i, j in zip(next_activities['Next_act'], next_activities['kpi_rel'])}
             real_dict[trace_idx] = {acts[-1]: actual_prediciton}
+        rec_dict =  {str(A): N for (A, N) in [x for x in rec_dict.items()]}
+        real_dict = {str(A): N for (A, N) in [x for x in real_dict.items()]}
         pickle.dump(rec_dict, open(f'recommendations/{experiment_name}/rec_dict.pkl', 'wb'))
         pickle.dump(real_dict, open(f'recommendations/{experiment_name}/real_dict.pkl', 'wb'))
         print('Prediction generation completed')
@@ -580,17 +585,18 @@ def create_expl_fig(n_clicks):
             if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
                     list(real_dict[key].values())[0] * .05):
                 kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
-        # layout = get_layout(real_dict)
+        layout = get_layout(real_dict)
+        kpis_dict = {str(A): N for (A, N) in [x for x in kpis_dict.items()]}
         return dcc.Graph(
                     figure={
                         'data': [
-                            {'x': [int(kpis_dict[i][1]) for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                            {'x': [int(kpis_dict[i][1])/60 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
                              'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                            {'x': [int(kpis_dict[i][0]) for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
+                            {'x': [int(kpis_dict[i][0])/60 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
                              'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
                              'marker': dict(color='rgba(0, 60, 0, 1)')},
-                        ]# ,
-                        # 'layout': layout
+                        ],
+                        'layout': layout
                     },
                 )
     else :
@@ -631,7 +637,7 @@ def save_result(value):
             df = pd.DataFrame(columns=['Next Activity', 'Expected KPI'])
 
             for i in range(len(dict_id.keys())):
-                df.loc[i] = np.array([list(dict_id.keys())[i], dict_id[list(dict_id.keys())[i]]])
+                df.loc[i] = np.array([list(dict_id.keys())[i], dict_id[list(dict_id.keys())[i]]/60])
             return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
         except :
             return "Running not executed, please insert a running log a generate recommendations"
@@ -654,119 +660,123 @@ def show_trace_dropdown(n_clicks):
     Input('dropdown_activities', 'value')
 )
 def create_expl_fig(value):
-    try :
-        activity_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
-        df_run = pd.read_csv('gui_backup/dfrun_preprocessed.csv')
-        if value in set(df_run[activity_name]):
-            trace_idx = pickle.load(open('gui_backup/chosen_trace.pkl','rb'))
-            act = value
+    if value is not None:
+        try :
+            activity_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
+            df_run = pd.read_csv('gui_backup/dfrun_preprocessed.csv')
+            if value in set(df_run[activity_name]):
+                trace_idx = pickle.load(open('gui_backup/chosen_trace.pkl','rb'))
+                act = value
 
-            for i in df_run.columns:
-                if 'Unnamed' in i:
-                    del df_run[i]
-            case_id_name = pickle.load(open('gui_backup/case_id_name.pkl', 'rb'))
-            experiment_name = 'Gui_experiment'
-            X_test = df_run.copy()
-            traces_hash = pickle.load(open('gui_backup/transition_system.pkl', 'rb'))
-
-
-            trace_exp = df_run[df_run[case_id_name]==trace_idx].copy()
-            trace = df_run[df_run[case_id_name]==trace_idx].iloc[:,1:].copy()
-            trace_exp.rename(columns={'time_from_midnight': 'daytime'}, inplace=True)
-            trace.rename(columns={'time_from_midnight': 'daytime'}, inplace=True)
-
-            # start = time.time()
-            quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
-            qualitative_vars = pickle.load(open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'rb'))
-            pred_column = pickle.load(open('gui_backup/pred_column.pkl','rb'))
-            model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred_column)
-            rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))[trace_idx]
-            rec_dict = dict(sorted(rec_dict.items(), key=lambda x: x[1]))
-            rec_dict = {A: N for (A, N) in [x for x in rec_dict.items()][:3]}
+                for i in df_run.columns:
+                    if 'Unnamed' in i:
+                        del df_run[i]
+                case_id_name = pickle.load(open('gui_backup/case_id_name.pkl', 'rb'))
+                experiment_name = 'Gui_experiment'
+                X_test = df_run.copy()
+                traces_hash = pickle.load(open('gui_backup/transition_system.pkl', 'rb'))
 
 
-            for var in (set(quantitative_vars).union(qualitative_vars)):
-                trace_exp[var] = "none"
-            groundtruth_explanation = explain_recsys.evaluate_shap_vals(trace_exp, model, df_run, case_id_name)
-            groundtruth_explanation = [a for a in groundtruth_explanation]
-            groundtruth_explanation = [trace_idx] + groundtruth_explanation
-            groundtruth_explanation = pd.Series(groundtruth_explanation, index=[i for i in df_run.columns if i != 'y'])
+                trace_exp = df_run[df_run[case_id_name]==trace_idx].copy()
+                trace = df_run[df_run[case_id_name]==trace_idx].iloc[:,1:].copy()
+                trace_exp.rename(columns={'time_from_midnight': 'daytime'}, inplace=True)
+                trace.rename(columns={'time_from_midnight': 'daytime'}, inplace=True)
 
-            # Save also groundtruth explanations
-            groundtruth_explanation.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv')
-            groundtruth_explanation.drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))],
-                                         inplace=True)
-
-            # stampa l'ultima riga di trace normale
-            trace_exp.iloc[-1].to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_values.csv')
-            last = trace_exp.iloc[-1].copy().drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))])
-            next_activities = list(rec_dict.keys())  # TODO: Note that is only optimized for minimizing a KPI
+                # start = time.time()
+                quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
+                qualitative_vars = pickle.load(open(f'explanations/{experiment_name}/qualitative_vars.pkl', 'rb'))
+                pred_column = pickle.load(open('gui_backup/pred_column.pkl','rb'))
+                model = utils.import_predictor(experiment_name=experiment_name, pred_column=pred_column)
+                rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))[trace_idx]
+                rec_dict = dict(sorted(rec_dict.items(), key=lambda x: x[1]))
+                rec_dict = {A: N for (A, N) in [x for x in rec_dict.items()][:3]}
 
 
-            trace_exp.reset_index(drop=True, inplace=True)
-            trace_exp.loc[len(trace_exp) - 1, activity_name] = act
+                for var in (set(quantitative_vars).union(qualitative_vars)):
+                    trace_exp[var] = "none"
+                groundtruth_explanation = explain_recsys.evaluate_shap_vals(trace_exp, model, df_run, case_id_name)
+                groundtruth_explanation = [a for a in groundtruth_explanation]
+                groundtruth_explanation = [trace_idx] + groundtruth_explanation
+                groundtruth_explanation = pd.Series(groundtruth_explanation, index=[i for i in df_run.columns if i != 'y'])
 
-            explanations = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
-            explanations = [a for a in explanations]
-            explanations = [trace_idx] + explanations
-            explanations = pd.Series(explanations, index=[i for i in trace_exp.columns if i!='y'])
-            explanations.to_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv')
+                # Save also groundtruth explanations
+                groundtruth_explanation.to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv')
+                groundtruth_explanation.drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))],
+                                             inplace=True)
 
-            #Take the best-4 deltas
-            explanations.drop([case_id_name]+[i for i in (set(quantitative_vars).union(qualitative_vars))], inplace=True)
-            groundtruth_explanation = groundtruth_explanation[list(explanations.index)]
-            deltas_expls = groundtruth_explanation - explanations
-            deltas_expls.sort_values(ascending=False, inplace=True)
-            idxs_chosen = deltas_expls.index[:4]
-
-            pickle.dump(idxs_chosen, open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'wb'))
-            pickle.dump(last, open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'wb'))
-            explain_recsys.plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act)
+                # stampa l'ultima riga di trace normale
+                trace_exp.iloc[-1].to_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_values.csv')
+                last = trace_exp.iloc[-1].copy().drop([case_id_name] + [i for i in (set(quantitative_vars).union(qualitative_vars))])
+                next_activities = list(rec_dict.keys())  # TODO: Note that is only optimized for minimizing a KPI
 
 
-            trace_idx = pickle.load(open('gui_backup/chosen_trace.pkl', 'rb'))
-            act = value
-            experiment_name = 'Gui_experiment'
+                trace_exp.reset_index(drop=True, inplace=True)
+                trace_exp.loc[len(trace_exp) - 1, activity_name] = act
 
-            print('Generating explanations..')
+                explanations = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
+                explanations = [a for a in explanations]
+                explanations = [trace_idx] + explanations
+                explanations = pd.Series(explanations, index=[i for i in trace_exp.columns if i!='y'])
+                explanations.to_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv')
 
-            explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
-            idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
-            groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
-            last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
+                #Take the best-4 deltas
+                explanations.drop([case_id_name]+[i for i in (set(quantitative_vars).union(qualitative_vars))], inplace=True)
+                groundtruth_explanation = groundtruth_explanation[list(explanations.index)]
+                deltas_expls = groundtruth_explanation - explanations
+                deltas_expls.sort_values(ascending=False, inplace=True)
+                idxs_chosen = deltas_expls.index[:4]
 
-            expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
-                       "Current Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
+                pickle.dump(idxs_chosen, open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'wb'))
+                pickle.dump(last, open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'wb'))
+                explain_recsys.plot_explanations_recs(groundtruth_explanation, explanations, idxs_chosen, last, experiment_name, trace_idx, act)
 
-            last = last[idxs_chosen]
-            feature_names = [str(i) for i in last.index]
-            feature_values = [str(i) for i in last.values]
 
-            index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
-            plot_df = pd.DataFrame(data=expl_df)
-            plot_df.index = index
+                trace_idx = pickle.load(open('gui_backup/chosen_trace.pkl', 'rb'))
+                act = value
+                experiment_name = 'Gui_experiment'
 
-    except:
-        print('Explanations still not present')
+                print('Generating explanations..')
 
-    try:
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=list(expl_df['Following Recommendation']),
-            y=list(index),
-            name='Following recommendation',
-            marker_color='darkgreen', orientation='h'
-        ))
-        fig.add_trace(go.Bar(
-            x=list(expl_df['Actual Value']),
-            y=list(index),
-            name='Actual Value',
-            marker_color='darkred', orientation='h'
-        ))
-        fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not\n the recommendation for the activity {act} and the trace {value}')
-        return dcc.Graph(figure=fig)
-    except:
-        return 'Please select one of the activities proposed above'
+                explanations = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_{act}_expl_df.csv', index_col=0)
+                idxs_chosen = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_{act}_idx_chosen.pkl', 'rb'))
+                groundtruth_explanation = pd.read_csv(f'explanations/{experiment_name}/{trace_idx}_expl_df_gt.csv', index_col=0)
+                last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
+
+                expl_df = {"Following Recommendation": [float(i)/60 for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
+                           "Actual Value": [float(i)/60 for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
+
+                last = last[idxs_chosen]
+                feature_names = [str(i) for i in last.index]
+                feature_values = [str(i) for i in last.values]
+
+                index = [feature_names[i] + '=' + feature_values[i] for i in range(len(feature_values))]
+                plot_df = pd.DataFrame(data=expl_df)
+                plot_df.index = index
+
+
+        except:
+            print('Explanations still not present')
+
+        try:
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=list(expl_df['Following Recommendation']),
+                y=list(index),
+                name='Following recommendation',
+                marker_color='darkgreen', orientation='h'
+            ))
+            fig.add_trace(go.Bar(
+                x=list(expl_df['Actual Value']),
+                y=list(index),
+                name='Actual Value',
+                marker_color='darkred', orientation='h'
+            ))
+            fig.update_layout(title_text=f'Explanations (change in Shapley values) following or not\n the recommendation',
+                              showlegend=True)
+            # fig.update_style(width='60%')
+            return dcc.Graph(figure=fig)
+        except:
+            return 'Please select one of the activities proposed above'
 
 @app.callback(
     Output('eo4', 'children'),
@@ -778,10 +788,4 @@ def create_expl_fig(value):
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', debug=True)
-
-
-
-
-
-
 
