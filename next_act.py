@@ -172,6 +172,7 @@ def generate_recommendations(df_rec, df_score, columns, case_id_name, pred_colum
         pickle.dump(real_dict, open(f'recommendations/{experiment_name}/real_dict.pkl', 'wb'))
 
         print(f'The suggested activity is {rec_act}')
+        import ipdb; ipdb.set_trace()
         if explain:
             trace_exp = trace.copy()
             start = time.time()
