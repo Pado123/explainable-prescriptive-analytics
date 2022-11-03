@@ -736,7 +736,7 @@ def create_expl_fig(value):
             last = pickle.load(open(f'explanations/{experiment_name}/{trace_idx}_last.pkl', 'rb'))
 
             expl_df = {"Following Recommendation": [float(i) for i in explanations['0'][idxs_chosen].sort_values(ascending=False).values],
-                       "Actual Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
+                       "Current Value": [float(i) for i in groundtruth_explanation['0'][idxs_chosen].sort_values(ascending=False).values]}
 
             last = last[idxs_chosen]
             feature_names = [str(i) for i in last.index]
