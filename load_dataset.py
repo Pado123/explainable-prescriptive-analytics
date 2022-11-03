@@ -762,7 +762,8 @@ def prepare_dataset(df, case_id_name, activity_column_name, start_date_name, dat
         except ValueError:
             pass
             # df.iloc[:, 0] = pd.Series(df.iloc[:, 0]).astype('category').cat.codes.values
-
+        import time
+        print(f'final preprocessing time is {time.time()}')
         if mode == "train":
             prepare_data_for_ml_model_and_predict(df, target_column, target_column_name, event_level, column_type, mode,
                                                   experiment_name, override, activity_column_name, pred_column,
@@ -862,8 +863,8 @@ def preprocess_df(df, case_id_name, activity_column_name, start_date_name, date_
 
     if mode == "train" and pred_column == "remaining_time":
         mean_reference_target = write_leadtime_reference_mean(df, case_id_name, start_date_name, end_date_name)
-        histogram_median_events_per_dataset(df, case_id_name, activity_column_name, start_date_name,
-                                            end_date_name)
+        # histogram_median_events_per_dataset(df, case_id_name, activity_column_name, start_date_name,
+        #                                     end_date_name)
     df = prepare_data_and_add_features(df, case_id_name, start_date_name, date_format, end_date_name)
 
     if "activity_duration" in df.columns:
