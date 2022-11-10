@@ -32,6 +32,18 @@ from load_dataset import prepare_dataset
 import hash_maps
 import utils
 import shutil
+from urllib.parse import quote as urlquote
+import base64
+from flask import Flask, send_from_directory
+
+UPLOAD_DIRECTORY = os.getcwd() + '/gui_backup'
+if not os.path.exists(UPLOAD_DIRECTORY):
+    os.makedirs(UPLOAD_DIRECTORY)
+
+
+# Normally, Dash creates its own Flask server internally. By creating our own,
+# we can create a route for downloading files directly:
+server = Flask(__name__)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 expl_df = pd.DataFrame(columns=['Following Recommendation', 'Actual Value'])
@@ -40,14 +52,19 @@ expl_df['Following Recommendation'] = [0.68, 0.43, -0.08, -0.43]
 expl_df['Actual Value'] = [0.78, 0.45, 0.12, -0.29]
 def get_layout(d):
     layout = go.Layout(
-        yaxis=dict(
-            range=[len(d), len(d)-20]
+        xaxis=dict(
+            range=[min([d[key][1] for key in list(d.keys())[:20]]), max([d[key][1] for key in list(d.keys())[:20]])]
         ),
+        yaxis=dict(),
         height=600
     )
     return layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+@server.route("/download/<path:path>")
+def download(path):
+    """Serve a file from the upload directory."""
+    return send_from_directory(UPLOAD_DIRECTORY, path, as_attachment=True)
 
 # Set the experiment name
 experiment_name = 'exp_time_VINST'
@@ -82,62 +99,27 @@ for key in real_dict.keys():
     if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (list(real_dict[key].values())[0]*.05):
         kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
 
-def parse_contents(contents, filename, date):
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
-            df.to_csv('data/curr_df.csv', index=None)
-            df.to_csv('gui_backup/curr_df.csv', index=None)
-            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl','wb'))
-
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-
-        elif '.xes' in filename:
-            #Assume that it is a log
-            pm4py.convert_to_dataframe(pm4py.read_xes(io.BytesIO(decoded))).to_csv(path_or_buf=(filename[:-4] + '.csv'), index=None)
-
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing this file.'
-        ])
-    return list(df.columns)
-
-def parse_contents_run(contents, filename, date):
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
-            df.to_csv('data/run_df.csv', index=None)
-            df.to_csv('gui_backup/run_df.csv', index=None)
-            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl','wb'))
-
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-
-        elif '.xes' in filename:
-            #Assume that it is a log
-            pm4py.convert_to_dataframe(pm4py.read_xes(io.BytesIO(decoded))).to_csv(path_or_buf=(filename[:-4] + '.csv'), index=None)
+def save_file(name, content):
+    """Decode and store a file uploaded with Plotly Dash."""
+    data = content.encode("utf8").split(b";base64,")[1]
+    with open(os.path.join(UPLOAD_DIRECTORY, name), "wb") as fp:
+        fp.write(base64.decodebytes(data))
 
 
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing this file.'
-        ])
-    return list(df.columns)
+def uploaded_files():
+    """List the files in the upload directory."""
+    files = []
+    for filename in os.listdir(UPLOAD_DIRECTORY):
+        path = os.path.join(UPLOAD_DIRECTORY, filename)
+        if os.path.isfile(path):
+            files.append(filename)
+    return files
+
+
+def file_download_link(filename):
+    """Create a Plotly Dash 'A' element that downloads a file from the app."""
+    location = "/download/{}".format(urlquote(filename))
+    return html.A(filename, href=location)
 
 app.layout = html.Div([html.Div(children=[
     dcc.Upload(id='upload-L_complete',
@@ -157,12 +139,20 @@ app.layout = html.Div([html.Div(children=[
     html.Button("Analize", id="df_analyzer", n_clicks=0),
     html.Div(id='output-L_complete'),
     html.Div(id='output-L_run'),
+    html.Div(id='unuseful_output'),
+    html.Div(id='empy_out'),
+    # dcc.Textarea(
+    #         id='textarea-state-radioitems-chooseKPI',
+    #         value='Select the activity for which you want to optimize the occurrence',
+    #         style={'width': '25%', 'height': 55, 'borderStyle':'None'},
+    #         disabled='True',
+    #     ),
     dcc.Textarea(
-            id='textarea-state-radioitems',
-            value='Select the KPI you want to optimize',
-            style={'width': '25%', 'height': 35, 'borderStyle':'None'},
-            disabled='True',
-        ),
+        id='textarea-state-radioitems',
+        value='Select the KPI you want to optimize',
+        style={'width': '25%', 'height': 35, 'borderStyle': 'None'},
+        disabled='True',
+    ),
     dcc.RadioItems([
         {'label': 'Total execution time   ', 'value': 'Decrease Time'},
         # {'label': 'Total cost of the procedure   ', 'value': 'Decrease cost'},  #TODO :Not implemented path
@@ -172,42 +162,37 @@ app.layout = html.Div([html.Div(children=[
         labelStyle={'display': 'block'},
         id='radioitem_kpi',
     ),
-    html.Div(id='unuseful_output'),
-    html.Div(id='empy_out'),
-    dcc.Textarea(
-            id='textarea-state-radioitems-chooseKPI',
-            value='Select the activity for which you want to optimize the occurrence',
-            style={'width': '25%', 'height': 55, 'borderStyle':'None'},
-            disabled='True',
-        ),
     html.Div(id='dropdown-container', children=[]),
     html.Div(id='dropdown-container-output'),
     html.Div(id='dropdown_KPIactivity'),
-    html.Div(id='training_notify'),
-    html.Div(id='eo2'),
+    html.Div(id='eo6'),
     html.Div(id='eo3'),
     html.Div(id='eo4'),
     html.Button('Train', id='submit-values_and_train', n_clicks=0),
-    dcc.Upload(
-                    id='upload-L_run',
-                    children=html.Div([
-                        'Drag and Drop or ',
-                        html.A('Select a log of running instances the framework')
-                    ]),
-                    style={
-                        'width': '40%',
-                        'height': '60px',
-                        'lineHeight': '60px',
-                        'borderWidth': '1px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
-                    # Allow multiple files to be uploaded
-                    multiple=False
-                ),
+    html.Div(id='eo5'),
+    html.Div(id='eo2'),
+    dcc.Upload(id='upload-L_run',
+                children=html.Div([
+                    'Drag and Drop or ',
+                    html.A('Select a log of running instances the framework')
+                ]),
+                style={
+                    'width': '40%',
+                    'height': '60px',
+                    'lineHeight': '60px',
+                    'borderWidth': '1px',
+                    'borderStyle': 'dashed',
+                    'borderRadius': '5px',
+                    'textAlign': 'center',
+                    'margin': '10px'
+                },
+                # Allow multiple files to be uploaded
+                multiple=False
+            ),
+    html.Div(id='file-list'),
+    html.Div(id='file-list2'),
     html.Button('Generate prediction', id='generate_prediction_button', n_clicks=0),
+    html.Div(id='eo7'),
     html.Button('Show Prediction', id='show_pred_button', n_clicks=0),
     html.Div(id='figure_prediction'),
     dcc.Textarea(
@@ -236,12 +221,11 @@ app.layout = html.Div([html.Div(children=[
                    id='slider_expls'
         ),
     html.Div(id='figure_explanation'),
+    html.Div(id='eo9'),
     html.Br()
 ])
 ]
 )
-
-
 
 @app.callback(
     Output('unuseful_output', 'children'),
@@ -250,17 +234,6 @@ app.layout = html.Div([html.Div(children=[
 def chosen_kpi(radiout):
     pickle.dump(radiout, open('gui_backup/chosen_kpi.pkl', 'wb'))
     return None
-
-
-@app.callback(Output('output-L_complete', 'children'),
-              Input('upload-L_complete', 'contents'),
-              State('upload-L_complete', 'filename'),
-              State('upload-L_complete', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None:
-        children = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
 
 @app.callback(
     Output('dropdown-container', 'children'),
@@ -273,9 +246,17 @@ def display_dropdowns(n_clicks, children):
             if i == 0:name = 'Select the case id column'
             elif i == 1: name = 'Select the activity column'
             elif i == 2: name = 'Select the timestamp column'
-            elif i == 3: name = 'Select the resourcename column (optional)'
+            elif i == 3: name = 'Select the resource name column (optional)'
 
-            new_dropdown = dcc.Dropdown(
+            new_dropdown = dbc.Row(
+                        [dbc.Col(dcc.Textarea(value = name.split(' ')[2] + ' column',
+                                              style={'width':'100%', 'margin': dict(
+                                                  l=0,
+                                                  r=0,
+                                                  b=0,
+                                                  t=0)},
+                                              )),
+                         dbc.Col(dcc.Dropdown(
                         pickle.load(open('gui_backup/col_list_train.pkl','rb')),
                         placeholder=name,
                         id={
@@ -283,9 +264,11 @@ def display_dropdowns(n_clicks, children):
                             'index': i+1
                         },
                         style = {
-                                    'width': '75%'
+                                    'width': '100%'
                                 },
-            )
+            )),
+            dbc.Col(dcc.Textarea(value=' ')),
+            dbc.Col(dcc.Textarea(value=' '))])
             children.append(new_dropdown)
         return children
 
@@ -315,14 +298,22 @@ def print_i(value):
             act_col = value[1]
             df = read_data(filename='gui_backup/curr_df.csv', start_time_col=value[2])
             act_list = list(df[act_col].unique())
-            return html.Div([dcc.Dropdown(act_list, placeholder='Select the activity to optimize (optional)',
-                                          style={'width': '75%'},)])
+
+            return dbc.Row(
+                        [dbc.Col(dcc.Textarea(value = 'Activity to optimize column',
+                                              style={'width':'100%', 'border': 'None', 'background-color': 'transparent', 'outline': 'None'}
+                                              )),
+                         dbc.Col(dcc.Dropdown(act_list, placeholder='Select the activity to optimize (optional)',
+                                          style={'width': '100%'}, id='dropdown_KPIactivity')),
+                         dbc.Col(dcc.Textarea(value=' ', )),
+                         dbc.Col(dcc.Textarea(value=' '))])
 
         else: return None
 
+
 @app.callback(
-    Output('training_notify', 'children'),
-    Input('Act_Chosen_dropdown', 'value')
+    Output('eo6', 'children'),
+    Input('dropdown_KPIactivity', 'value')
 )
 def save_activity(value):
     if value is not None:
@@ -335,6 +326,8 @@ def save_activity(value):
 )
 def train_predictor_and_hashmap(n_clicks):
     if n_clicks > 0:
+        import time
+        print(f'{time.time()}')
         filename = 'gui_backup/curr_df.csv'
         convert_to_csv(filename)
         filename = modify_filename(filename)
@@ -351,7 +344,7 @@ def train_predictor_and_hashmap(n_clicks):
         pred_column = 'independent_activity'*(pred_column=='Minimize the activity occurrence') + \
                       'remaining_time'*(pred_column == 'Decrease Time')
         experiment_name = 'Gui_experiment'
-        if pred_column == 'Minimize the activity occurrence':
+        if pred_column == 'independent_activity':
             predict_activities = [pickle.load(open('gui_backup/activity_to_optimize.pkl', 'rb'))]
         else :
             predict_activities = None
@@ -361,6 +354,8 @@ def train_predictor_and_hashmap(n_clicks):
                                                                                               None, None, None
         create_folders(folders, safe=override)
         shap = False
+        #140 RIGHE AL SECONDO
+        #240 RIGHE AL SECONDO
         prepare_dataset(df=df, case_id_name=case_id_name, activity_column_name=activity_name,
                         start_date_name=start_date_name, date_format=date_format, end_date_name=end_date_name,
                         pred_column=pred_column, mode="train", experiment_name=experiment_name, override=override,
@@ -406,32 +401,54 @@ def train_predictor_and_hashmap(n_clicks):
         pickle.dump(qualitative_trace_vars, open(f'explanations/{experiment_name}/qualitative_trace_vars.pkl', 'wb'))
 
         print('Variable analysis done')
-        return 'Training_finished'
-
-
-@app.callback(Output('output-L_run', 'children'),
-              Input('upload-L_run', 'contents'),
-              State('upload-L_run', 'filename'),
-              State('upload-L_run', 'last_modified'))
-def update_output_2(list_of_contents, list_of_names, list_of_dates):
-    if type(list_of_dates)!=list:
-        list_of_dates = [list_of_dates]
-    if type(list_of_contents)!=list:
-        list_of_contents = [list_of_contents]
-    if type(list_of_names)!=list:
-        list_of_names = [list_of_names]
-    if list_of_contents is not None:
-        try :
-            children = [
-                parse_contents_run(c, n, d) for c, n, d in
-                zip(list_of_contents, list_of_names, list_of_dates)]
-        except :
-            None
-
-
+        print(f'{time.time()}')
+        return 'Training finished'
 
 @app.callback(
-    Output('eo3', 'children'),
+    Output('eo5', 'children'),
+    Input('submit-values_and_train', 'n_clicks'),
+)
+def print_expected_time(n_clicks):
+    if n_clicks > 0:
+        import time
+        print(f'{time.time()}')
+        filename = 'gui_backup/curr_df.csv'
+        convert_to_csv(filename)
+        filename = modify_filename(filename)
+        date_format = "%Y-%m-%d %H:%M:%S"
+        start_date_name = pickle.load(open('gui_backup/start_date_name.pkl', 'rb'))
+        df = read_data(filename, start_date_name, date_format)
+        seconds = df.shape[0]/210
+        h  = seconds//3600
+        min = (seconds%3600)//60
+        print(df.shape)
+        return f'The training will finish approximately in {h} hour and {min} min'
+
+@app.callback(
+    Output('eo7', 'children'),
+    Input('generate_prediction_button', 'n_clicks'),
+)
+def print_expected_time_gen(n_clicks):
+    if n_clicks > 0:
+        import time
+        print(f'{time.time()}')
+        filename = 'gui_backup/dfrun_preprocessed.csv'
+        convert_to_csv(filename)
+        filename = modify_filename(filename)
+        date_format = "%Y-%m-%d %H:%M:%S"
+        start_date_name = pickle.load(open('gui_backup/start_date_name.pkl', 'rb'))
+        try:
+            df = read_data(filename, start_date_name, date_format)
+        except:
+            df = read_data(filename, 'time_from_start', date_format)
+        seconds = df.shape[0] / 190
+        h = seconds // 3600
+        min = (seconds % 3600) // 60
+        print(df.shape)
+        return f'The generation will finish approximately in {h} hour and {min} min'
+
+@app.callback(
+    Output('eo4', 'children'),
     Input('generate_prediction_button', 'n_clicks'),
 )
 def generate_predictions(n_clicks):
@@ -455,10 +472,14 @@ def generate_predictions(n_clicks):
                           'remaining_time'*(pred_column == 'Decrease Time')
         pickle.dump(pred_column, open('gui_backup/pred_column.pkl','wb'))
         experiment_name = 'Gui_experiment'
-        if pred_column == 'Minimize the activity occurrence':
+        if pred_column == 'independent_activity':
             predict_activities = [pickle.load(open('gui_backup/activity_to_optimize.pkl', 'rb'))]
         else:
             predict_activities = None
+
+        for i in df_rec.columns:
+            if 'Unnamed' in i:
+                del df_rec[i]
         end_date_name = None # try : pickle.load(open('gui_backup/end_date.pkl', 'rb')) except:
         role_column_name = None #TODO: implement a function which maps the possibility of having the variable
         override, pred_attributes, costs, working_time, lost_activities, retained_activities = True, None, None, \
@@ -466,9 +487,13 @@ def generate_predictions(n_clicks):
         create_folders(folders, safe=override)
         shap = False
         df_rec = utils.read_data(filename='data/run_df.csv', start_time_col=start_date_name)
-        if pred_column not in ['independent_activity','remaining_time'] :
-            pred_column = 'independent_activity'*(pred_column=='Minimize the activity occurrence') + \
-                          'remaining_time'*(pred_column == 'Decrease Time')
+        print('Creating hash-map of possible next activities')
+        X_train = pd.read_csv('gui_backup/X_train.csv').iloc[:,1:]
+        outlier_thrs = 0
+        traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
+                                             thrs=outlier_thrs)
+        print('Hash-map created')
+
         df_rec = load_dataset.preprocess_df(df=df_rec, case_id_name=case_id_name, activity_column_name=activity_name,
                         start_date_name=start_date_name, date_format=date_format, end_date_name=end_date_name,
                         pred_column=pred_column, mode="train", experiment_name=experiment_name, override=override,
@@ -483,13 +508,6 @@ def generate_predictions(n_clicks):
         print(4*'\n')
         print('Starting generating recommendations')
 
-        outlier_thrs = 0
-
-        print('Creating hash-map of possible next activities')
-        X_train = pd.read_csv('gui_backup/X_train.csv').iloc[:,1:]
-        traces_hash = hash_maps.fill_hashmap(X_train=X_train, case_id_name=case_id_name, activity_name=activity_name,
-                                             thrs=outlier_thrs)
-        print('Hash-map created')
         pickle.dump(traces_hash, open('gui_backup/transition_system.pkl', 'wb'))
 
         idx_list = df_rec[case_id_name].unique()
@@ -507,7 +525,6 @@ def generate_predictions(n_clicks):
         for trace_idx in tqdm.tqdm(idx_list):
             trace = df_rec[df_rec[case_id_name] == trace_idx].reset_index(drop=True)
             trace = trace.reset_index(drop=True)  # trace.iloc[:, :-1].reset_index(drop=True)
-            print(trace_idx)
             trace.rename(columns={'time_from_midnight': 'daytime'}, inplace=True)
             # trace = trace[list(model.feature_names_)]
             try:
@@ -562,6 +579,11 @@ def create_expl_fig(n_clicks):
         # Read the dictionaries with the scores
         rec_dict = pickle.load(open(f'recommendations/{experiment_name}/rec_dict.pkl', 'rb'))
         real_dict = pickle.load(open(f'recommendations/{experiment_name}/real_dict.pkl', 'rb'))
+        pred_column = pickle.load(open('gui_backup/chosen_kpi.pkl', 'rb'))
+        if pred_column in ['Minimize the activity occurrence', 'independent_activity']:
+            res_val = 1
+        else:
+            res_val = 60
 
         # Read the variables' types
         quantitative_vars = pickle.load(open(f'explanations/{experiment_name}/quantitative_vars.pkl', 'rb'))
@@ -585,24 +607,35 @@ def create_expl_fig(n_clicks):
             if list(best_scores[key].values())[0] <= list(real_dict[key].values())[0] + (
                     list(real_dict[key].values())[0] * .05):
                 kpis_dict[key] = [list(best_scores[key].values())[0], list(real_dict[key].values())[0]]
-        layout = get_layout(real_dict)
+
         kpis_dict = {str(A): N for (A, N) in [x for x in kpis_dict.items()]}
-        return dcc.Graph(
-                    figure={
-                        'data': [
-                            {'x': [int(kpis_dict[i][1])/60 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                             'type': 'bar', 'name': 'Actual value', 'orientation': 'h', 'marker': dict(color='rgba(130, 0, 0, 1)')},
-                            {'x': [int(kpis_dict[i][0])/60 for i in kpis_dict.keys()], 'y': list(kpis_dict.keys()),
-                             'type': 'bar', 'name': 'Following recommendation', 'orientation': 'h',
-                             'marker': dict(color='rgba(0, 60, 0, 1)')},
-                        ],
-                        'layout': layout
-                    },
-                )
+        kpis_dict = dict(sorted(kpis_dict.items(), key=lambda item: item[1][1]))
+        layout = get_layout(kpis_dict)
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=list([kpis_dict[k][0] for k in kpis_dict.keys()]),
+            y=list(kpis_dict.keys()),
+            name='Following recommendation',
+            orientation='h',
+            marker_color='darkgreen',
+        ))
+        fig.add_trace(go.Bar(
+            x=[kpis_dict[k][1] for k in kpis_dict.keys()],
+            y=list(kpis_dict.keys()),
+            name='Actual Value',
+            orientation='h',
+            marker_color='darkred',
+        ))
+        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)',
+                          plot_bgcolor='rgba(0,0,0,0)',
+                          xaxis=dict(range=[0,max([kpis_dict[k][1] for k in kpis_dict.keys()])]),
+                          yaxis=dict(range=[len(kpis_dict)-10, len(kpis_dict)]))
+        # fig.update_style(width='60%')
+        return dcc.Graph(figure=fig)
+
     else :
         return None
-
-
 
 
 
@@ -645,6 +678,63 @@ def save_result(value):
 
 
 @app.callback(
+    Output("file-list", "children"),
+    [Input("upload-L_run", "filename"), Input("upload-L_run", "contents")],
+)
+def update_output(uploaded_filenames, uploaded_file_contents):
+    """Save uploaded files and regenerate the file list."""
+    if type(uploaded_filenames) == str:
+        uploaded_filenames = [uploaded_filenames]
+    if type(uploaded_file_contents) == str:
+        uploaded_file_contents = [uploaded_file_contents]
+
+    if uploaded_filenames is not None and uploaded_file_contents is not None:
+        for name, data in zip(uploaded_filenames, uploaded_file_contents):
+            save_file(name, data)
+
+    if uploaded_filenames is not None:
+        if '.csv' in uploaded_filenames[0]:
+            df = pd.read_csv('gui_backup/'+ uploaded_filenames[0])
+            df.to_csv('data/run_df.csv', index=None)
+            df.to_csv('gui_backup/run_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl', 'wb'))
+        if '.xes' in uploaded_filenames[0]:
+            pm4py.convert_to_dataframe(pm4py.read_xes('gui_backup/'+uploaded_filenames[0])).to_csv(path_or_buf=('gui_backup/'+ uploaded_filenames[0][:-4] + '.csv'), index=None)
+            df = pd.read_csv('gui_backup/'+ uploaded_filenames[0][:-4] + '.csv')
+            df.to_csv('data/run_df.csv', index=None)
+            df.to_csv('gui_backup/run_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl', 'wb'))
+            print('Conversion ok')
+
+@app.callback(
+    Output("file-list2", "children"),
+    [Input("upload-L_complete", "filename"), Input("upload-L_complete", "contents")],
+)
+def update_output(uploaded_filenames, uploaded_file_contents):
+    """Save uploaded files and regenerate the file list."""
+    if type(uploaded_filenames) == str:
+        uploaded_filenames = [uploaded_filenames]
+    if type(uploaded_file_contents) == str:
+        uploaded_file_contents = [uploaded_file_contents]
+
+    if uploaded_filenames is not None and uploaded_file_contents is not None:
+        for name, data in zip(uploaded_filenames, uploaded_file_contents):
+            save_file(name, data)
+
+    if uploaded_filenames is not None:
+        if '.csv' in uploaded_filenames[0]:
+            df = pd.read_csv('gui_backup/'+ uploaded_filenames[0])
+            df.to_csv('data/curr_df.csv', index=None)
+            df.to_csv('gui_backup/curr_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl', 'wb'))
+        if '.xes' in uploaded_filenames[0]:
+            pm4py.convert_to_dataframe(pm4py.read_xes('gui_backup/'+uploaded_filenames[0])).to_csv(path_or_buf=('gui_backup/'+ uploaded_filenames[0][:-4] + '.csv'), index=None)
+            df = pd.read_csv('gui_backup/'+ uploaded_filenames[0][:-4] + '.csv')
+            df.to_csv('data/curr_df.csv', index=None)
+            df.to_csv('gui_backup/curr_df.csv', index=None)
+            pickle.dump(list(df.columns), open('gui_backup/col_list_train.pkl', 'wb'))
+            print('Conversion ok')
+@app.callback(
     Output('dropdown_activities', 'children'),
     Input('show_pred_button', 'n_clicks')
 )
@@ -664,6 +754,8 @@ def create_expl_fig(value):
         try :
             activity_name = pickle.load(open('gui_backup/act_name.pkl', 'rb'))
             df_run = pd.read_csv('gui_backup/dfrun_preprocessed.csv')
+            case_id_name = pickle.load(open('gui_backup/case_id_name.pkl', 'rb'))
+            df_run[case_id_name] = [str(i) for i in df_run[case_id_name]]
             if value in set(df_run[activity_name]):
                 trace_idx = pickle.load(open('gui_backup/chosen_trace.pkl','rb'))
                 act = value
@@ -712,7 +804,9 @@ def create_expl_fig(value):
 
                 trace_exp.reset_index(drop=True, inplace=True)
                 trace_exp.loc[len(trace_exp) - 1, activity_name] = act
-
+                for i in trace_exp.columns:
+                    if 'Unnamed' in i:
+                        del df_run[i]
                 explanations = explain_recsys.evaluate_shap_vals(trace_exp, model, X_test, case_id_name)
                 explanations = [a for a in explanations]
                 explanations = [trace_idx] + explanations
@@ -779,7 +873,7 @@ def create_expl_fig(value):
             return 'Please select one of the activities proposed above'
 
 @app.callback(
-    Output('eo4', 'children'),
+    Output('eo9', 'children'),
     Input('slider_expls', 'value')
 )
 def create_expl_fig(value):

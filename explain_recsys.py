@@ -11,6 +11,8 @@ from catboost import *
 import shap
 shap.initjs()
 
+import urllib3
+urllib3.disable_warnings()
 import pandas as pd
 
 import matplotlib.pyplot as plt
