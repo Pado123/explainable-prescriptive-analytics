@@ -85,7 +85,7 @@ def get_cut_test_set(t=float):
         if (line[1] < t) and (line[2] > t):
             X_test_idxs.append(line[0])
 
-def create_new_test_set(t): #TODO adjust this functions they suck
+def create_new_test_set(t): 
     
     final_testset = pd.DataFrame(columns=X_test.columns)
     res_list = list()
